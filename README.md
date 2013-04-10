@@ -4,9 +4,9 @@ A selection of primarily command-line tools often used (atm on linux systems), w
 
 Quick Start
 ----------
-0. `mkdir -p ~/usr && cd ~/usr` - Go to directory where you want to maintain this.
-1. `git clone ...` - Clone this repository into it. 
-2. `cd muiltools && ./go` - Install the scripts (into `~/usr/local`)
+0. `mkdir -p ~/usr && cd ~/usr` (goes to directory where you want to maintain this)
+1. `git clone git@github.com:robertmuil/muiltools.git` (clones this repository into it)
+2. `cd muiltools && ./go` (installs the tools, into `~/usr/local`)
 
 Description
 -----------
