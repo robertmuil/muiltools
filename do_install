@@ -6,8 +6,20 @@ BDIR="$LDIR/bin"
 
 INST='cp -vu'
 
-$INST externals/oodiff "$BDIR/"
-
 pushd odt2txt > /dev/null
 make DESTDIR="$LDIR" install && make clean
 popd > /dev/null
+
+if [ ! -d "$BDIR" ]; then
+	mkdir -pv "$BDIR"
+fi
+
+pushd bin
+for f in *; do
+	$INST "$f" "$BDIR/"
+done
+
+#TODO: test system architecture
+
+#TODO: install x86 bin
+#TODO: install x64 bin
