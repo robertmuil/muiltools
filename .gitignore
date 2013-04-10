@@ -1,3 +1,9 @@
+#specific to this project
+externals
+
+# general
+.backup
+
 # built application files
 *.apk
 *.ap_

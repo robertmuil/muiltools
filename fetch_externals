@@ -5,5 +5,11 @@
 # handled as sub-modules
 #
 
+EXT_DIR='externals'
+
+if [ ! -d "$EXT_DIR" ]; then
+	mkdir -v -p "$EXT_DIR"
+fi
+
 #First is oodiff.
-curl http://www-verimag.imag.fr/~moy/opendocument/oodiff > oodiff
+curl http://www-verimag.imag.fr/~moy/opendocument/oodiff > "$EXT_DIR"/oodiff
