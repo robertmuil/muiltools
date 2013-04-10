@@ -1,0 +1,138 @@
+#!/bin/bash
+#This stunning feat of scripting skill
+# is a wrapper for mplayer that saves and restores
+# the position in the file when the user exits before finishing the file.
+#
+#A simple text file is maintained in the directory to track the
+# position and used to resume when this file is played.
+#
+#Called without a file, it will take the first bookmark it finds and open
+# the corresponding audiovideo file at the appropriate place.
+#
+# The bookmark file will contain the time to resume at, in the format
+# accepted by mplayer's -ss argument (seconds)
+#
+#There's a good chance I just wasted 3-odd hours of my life on this.
+#
+#NB: before moving or deleting the bookmark file a copy is made to
+# .<fname>.bak
+#
+#rmuil 2011/08/07
+
+#TODO: discard input already on stdin when asking for confirmation to delete bookmarkfile
+#TODO: if no avfile specified nor bookmark found, play first avfile found
+#TODO: pass all remaining command-line arguments to mplayer
+#TODO: error checking (e.g. of endPos before writing to bookmark file)
+#TODO: is there a more efficient way of determining position than
+# capturing all stdout of mplayer and parsing the file?
+
+rewind=5 # the small amount of time to rewind before resuming at bookmark position
+bookmarkext=.bookmark.txt
+statusext=.stat
+
+shopt -s nullglob
+
+avfile="$1"
+
+if [ ! -z "$avfile" ]; then
+	#if the audiovideo file is defined, then the bookmark file must be the same but with
+	# a different or prepended extension
+	echo -n "avfile defined, looking for bookmark files..."
+	#take off the avfile's extension and glob all files with that beginning and the bookmark extension
+	for f in "${avfile%.*}"*$bookmarkext; do
+		if [ -f "$f" ]; then
+			bookmarkfile="$f"
+			echo "got '$f'."
+			break
+		fi
+	done
+	if [ -z "${bookmarkfile}" ]; then
+		echo "none."
+	fi
+else
+	#if no av file is defined, we look for bookmark files...
+	echo -n "no av file defined, looking for valid bookmark files..."
+	for f in *$bookmarkext; do
+		echo -n "'$f'"
+		#to find an associated avfile, take off bookmark extension and glob for matching files
+		for af in "${f%$bookmarkext}"*; do
+			if [ "${af}" != "${f}" ]; then
+				#take the first match that isn't the bookmark file itself
+				echo " with '$af', match."
+				avfile="$af"
+				break
+			fi
+		done
+		if [ -z "$avfile" ]; then
+			echo -n "? no..."
+		else
+			#use the first bookmark file to which we find an avfile.
+			bookmarkfile="${f}"
+			break
+		fi
+	done
+	if [ -z "$avfile" ]; then
+		echo "none."
+	fi
+fi
+
+if [ -z "$avfile" ]; then
+	echo "No avfile to play! If no avfiles have bookmarks, then specify an avfile on the command line."
+	exit 1
+fi
+
+if [ ! -z "$2" ]; then
+	resumePos="$2"
+elif [ -f "$bookmarkfile" ]; then
+	echo -n "found bookmark, "
+	_resumePos=$(cat "${bookmarkfile}")
+	resumePos=$(echo ${_resumePos} - ${rewind} | bc)
+fi
+
+if [ -z $resumePos ]; then
+	echo "no bookmark found or resume pos specified, starting from beginning"
+else
+	echo "resuming at $resumePos"
+	resumeArg="-ss $resumePos"
+fi
+
+statusfile=".$avfile$statusext"
+
+mplayer -msgmodule $resumeArg "$avfile" | tee "$statusfile"
+
+quitLine=`tail -1 "${statusfile}"`
+endStatusLine=`sed -e 's/\r/\r\n/g' "${statusfile}" | grep '^STATUSLINE' | tail -1`
+endPos=`sed -e 's/\r/\r\n/g' "${statusfile}" | awk -F '[ \t:]*' '$1~/STATUSLINE/ {print($3)}' | tail -1`
+#endPos=`awk -F '[ \t]*' '$1~/STATUSLINE/ {print($3)}'
+
+manualQuitRE="Exiting.*Quit"
+eofQuitRE="Exiting.*End [oO]f [fF]ile"
+if [[ ${quitLine} =~ ${manualQuitRE} ]]; then
+	echo -n "mplayer quit before end"
+	if [ ! -z $endPos ]; then
+		echo -n " and ending position defined - saving bookmark..."
+		if [ -z "${bookmarkfile}" ]; then
+			bookmarkfile="${avfile}${bookmarkext}"
+		fi
+		if [ -f "${bookmarkfile}" ]; then
+			mv "${bookmarkfile}" ".${bookmarkfile}.bak"
+		fi
+		echo $endPos > "${bookmarkfile}"
+		echo "done."
+	else
+		echo " but ending position could not be determined."
+	fi
+elif [[ "${quitLine}" =~ ${eofQuitRE} ]]; then
+	echo "end of file reached."
+	if [ ! -z "${bookmarkfile}" -a -f "${bookmarkfile}" ]; then
+		read -n 1 -p " Remove bookmark? " response
+		yesRE="[yY]"
+		if [[ ${response} =~ ${yesRE} ]]; then
+			mv "${bookmarkfile}" ".${bookmarkfile}.bak"
+			rm -f "${bookmarkfile}"
+		fi
+	fi
+else
+	echo "Unknown quit reason: '${quitLine}'"
+fi
+rm -f "$statusfile"

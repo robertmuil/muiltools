@@ -1,0 +1,45 @@
+#!/bin/bash
+
+#first parameter is the directory into which all files in current directory are to be consolidated.
+
+sourceDir="$PWD"
+targetDir="$1"
+
+MV="`which mv` -v"
+LINK="`which ln` -vs"
+
+function usage () {
+	echo "Usage:"
+	echo " `basename $0` <target directory>"
+	echo " "
+	echo " All files in current directory will be moved to the target directory, and replaced in current directory with soft links to their new location."
+	exit 1
+}
+
+if [ -z "$targetDir" ]; then
+	usage;
+fi
+echo "Will consolidate all files in $sourceDir into $targetDir..."
+echo "Press enter to continue, Ctrl-C to abort."
+read
+
+if [ ! -d "$targetDir" ]; then
+	mkdir -v -p "$targetDir"
+fi
+
+shopt -s nullglob
+for ff in *; do
+	fileName=`basename "$ff"`
+	if [ ! -d "$fileName" ]; then
+		echo -n "Moving: "
+		$MV "$fileName" "$targetDir/"
+		if (( $? == 0 )); then
+			echo -n "Linking: "
+			$LINK "$targetDir/$fileName" ./
+		else
+			echo "Error moving $ff..."
+			continue
+		fi
+	fi
+done
+echo "Consolidation complete."

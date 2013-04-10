@@ -1,0 +1,92 @@
+#!/bin/bash
+echo "Welcome to $0. This script will create links on this computer to the configuration data in ~/Personal/config such that config can be synced."
+shopt -s nullglob #if a filename pattern matches no files, don't use the pattern itself, just return null
+shopt -s dotglob  #match hidden files (starting with a dot) also
+
+#TODO: convert to associative array
+#NB: for xmodmap: a file named .Xmodmap in ~ will automatically by run by xinit.
+#These are the targets to be created by symbolic links to the Personal/config directory
+targets="$HOME/.htoprc $HOME/.Xmodmap $HOME/.Xresources $HOME/usr/bin $HOME/usr/lib $HOME/.config/awesome/rc.lua $HOME/.config/awesome/theme.lua $HOME/.bash_aliases $HOME/.bashrc $HOME/.inputrc $HOME/.zshrc $HOME/.vimrc $HOME/.vim $HOME/.mc/ini $HOME/.mc/panels.ini $HOME/.mc/bindings $HOME/.aliases $HOME/.ipython/profile_default/ipython_config.py $HOME/.ipython/profile_default/startup/ipy_user_focus.py $HOME/.subversion/config $HOME/.subversion/servers $HOME/.gitconfig"
+
+#batchSources are directories of files that should all be linked from the sourceDir
+declare -A batchSources
+batchSources["$HOME/usr/local/Umlet/palettes"]="$HOME/Personal/config/umlet/palettes"
+batchSources["$HOME/.config/awesome/revelation"]="$HOME/Personal/config/awesome/revelation"
+
+for targetDir in ${!batchSources[@]}; do
+	srcDir=${batchSources[${targetDir}]}
+	echo "${srcDir} -> ${targetDir}"
+	#if the source doesn't exist or is not a directory, ignore it
+	if [ ! -d ${srcDir} ]; then
+		continue
+	fi
+
+	if [ ! -d ${targetDir} ]; then
+		mkdir -p ${targetDir}
+	fi
+
+	for src in ${srcDir}/*; do
+		srcName=$(basename "${src}")
+		target=${targetDir}/${srcName}
+		if [ -z "${target}" ]; then
+			echo burp
+			continue
+		fi
+		if [ -e "${target}" -a ! -L "${target}" ]; then #exists
+			backupDir=${targetDir}/.backup
+			if [ ! -d "$backupDir" ]; then
+				mkdir -p "$backupDir"
+			fi
+			cp -br "${target}" "$backupDir/"
+		fi
+		ln -svfT "${src}" "${target}"
+	done
+done
+
+backupDir=$HOME/.backup
+
+if [ ! -d $backupDir ]; then
+	mkdir -p $backupDir
+fi
+
+for f in $targets; do
+	if [ -f "$f" ]; then
+		cp -b "$f" $backupDir
+	fi
+	if [ -d "$f" ]; then
+		cp -br "$f" $backupDir/
+	fi
+	ff=`basename "$f"`
+	case $ff in
+		.gitconfig ) sourceDir="$HOME/Personal/config/git";;
+		ipy* ) sourceDir="$HOME/Personal/config/ipython";;
+		bin ) sourceDir="$HOME/Personal";;
+		lib ) sourceDir="$HOME/Personal";;
+		rc.lua | theme.lua) sourceDir="$HOME/Personal/config/awesome";;
+		.htoprc ) sourceDir="$HOME/Personal/config/htop";;
+		.bash* | .profile | .inputrc) sourceDir="$HOME/Personal/config/bash";;
+		.aliases ) sourceDir="$HOME/Personal/config";;
+		.zsh* ) sourceDir="$HOME/Personal/config/zsh";;
+		.vim ) sourceDir="$HOME/Personal/config/vim";;
+		.vimrc ) sourceDir="$HOME/.vim";;
+		bindings | ini | panels.ini) sourceDir="$HOME/Personal/config/midnightcommander";;
+		.Xmodmap ) sourceDir="$HOME/Personal/config/X";;
+		.Xresources ) sourceDir="$HOME/Personal/config/X";;
+		servers | config ) sourceDir="$HOME/Personal/config/subversion";;
+		*) sourceDir="$HOME/Personal/config";;
+	esac
+	sourceFile=$sourceDir/$ff
+	if [ X$ff == "X.vim" ]; then
+		sourceFile="$sourceDir/vimfiles"
+	elif [ ! -e $sourceFile ]; then
+		echo "Error: cannot locate source file '$sourceFile' of target '$f'... skipping."
+		continue
+	fi
+	targetDir=`dirname "$f"`
+	if [ ! -d "$targetDir" ]; then
+		mkdir -p "$targetDir"
+	fi
+	ln -svfT $sourceFile "$f"
+done
+
+echo $0 finished.

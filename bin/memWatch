@@ -1,0 +1,54 @@
+#!/bin/bash
+
+#Will monitor memory and when threshold of free memory is reached, will pkill the process
+# listed on the command line.
+DEF_PTOKILL="python"
+
+pnameToKill=$1
+if [ -z $pnameToKill ]; then
+	pnameToKill=$DEF_PTOKILL
+fi
+
+Period=0.5
+MinFreeMem=128
+OutFile="memWatch.log"
+DateFmt="+%F,%T.%N,"
+function DBG {
+	echo -e $*
+}
+function OUT {
+	echo -n `date ${DateFmt}` |tee -a $OutFile
+	echo -e $* |tee -a $OutFile
+}
+
+if [ -e $OutFile ]; then
+	mv $OutFile $OutFile.bak
+fi
+OUT "Monitoring memory (low memory threshold is $MinFreeMem, process to kill is $pnameToKill)."
+vicious=false
+wasUnderThreshold=false
+while true; do
+	freePhysicalMem=`free -m |grep "Mem:" |awk '{ print $4 }'`
+	freeMem=`free -m |grep "buffers/cache:" |awk '{ print $4 }'`
+	if [ $freeMem -lt $MinFreeMem ]; then
+		wasUnderThreshold=true
+		if $vicious; then
+			pkill -KILL ${pnameToKill}
+			OUT pkill -KILL ${pnameToKill}
+		else
+			pkill ${pnameToKill}
+			OUT pkill ${pnameToKill}
+		fi
+		vicious=true
+		OUT "low memory condition (${freeMem} < ${MinFreeMem})"
+	else
+		if $wasUnderThreshold; then
+			vicious=false
+			wasUnderThreshold=false
+			OUT "free memory restored (${freeMem} > ${MinFreeMem})"
+		fi
+	fi
+	DBG "${freeMem}\t> ${MinFreeMem}"
+
+	sleep $Period
+done
