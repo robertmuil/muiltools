@@ -1,0 +1,13 @@
+#!/bin/bash
+#installs the tools of this package to local usr directory of home directory
+#
+LDIR="$HOME/usr/local"
+BDIR="$LDIR/bin"
+
+INST='cp -vu'
+
+$INST externals/oodiff "$BDIR/"
+
+pushd odt2txt > /dev/null
+make DESTDIR="$LDIR" install
+popd > /dev/null
