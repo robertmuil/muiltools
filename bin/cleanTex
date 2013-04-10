@@ -1,0 +1,40 @@
+#!/bin/bash
+
+#DEBUG="1"
+
+olddir=".backup"
+doomedExt="aux AUX log LOG bbl BBL blg BLG dvi DVI out OUT fdb_latexmk brf lof lol lot"
+maxRecurseLvl=2
+
+function dbg () if [ ! -z $DEBUG ]; then echo "dbg: $*"; fi
+
+dbg "$0 running with args \"$*\""
+
+if [ -z $cleanTexRecurseLvl ]; then
+	cleanTexRecurseLvl=0
+else
+	(( cleanTexRecurseLvl += 1))
+fi
+dbg "recurselvl = $cleanTexRecurseLvl"
+
+if [ ! -d ${olddir} ]; then mkdir ${olddir}; fi
+
+for f in *; do
+	if [ -d "$f" ]; then
+		dbg "dir: $f"
+		if (( cleanTexRecurseLvl < maxRecurseLvl )); then
+			dbg " -> recursing into $f"
+			pushd "$f" >/dev/null
+			env cleanTexRecurseLvl=$cleanTexRecurseLvl "$0" $*
+			popd >/dev/null
+		fi
+	else
+		dbg "file: $f"
+		for e in ${doomedExt}; do
+			if [[ "$f" =~ .*\.$e ]]; then
+				#dbg " -> would be moving $f to ${olddir}"
+				mv -v "${f}" "${olddir}/"
+			fi
+		done
+	fi
+done

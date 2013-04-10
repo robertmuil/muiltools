@@ -1,0 +1,62 @@
+#!/bin/bash
+
+MV=/bin/mv
+RM=/bin/rm
+
+outfile=uninstallPackage.log
+archivedir=$HOME/usr/archive
+prefix=$HOME/usr/local
+
+if [ -z $1 ]; then
+	echo "Error: provide package name..."
+	exit 1
+fi
+
+tarfile=${1}
+
+if [ ! -f $tarfile ]; then
+	echo "Error: no package file '$tarfile' found..."
+	exit 1
+fi
+
+package=${tarfile/%.tgz/}
+package=${package/%.gz/}
+package=${package/%.bz2/}
+package=${package/%.tar/}
+package=${package/%.installed/}
+
+echo "Installing package '$package'."
+
+echo -n "Uncompressing package file '$tarfile'..."
+if [[ $tarfile =~ .*\.bz2$ ]]; then
+	tar --bzip2 -xvf $tarfile > $outfile
+elif [[ $tarfile =~ .*\.tar\.gz$ || $tarfile =~ .*\.tgz$ ]]; then
+	tar -xzvf $tarfile > $outfile
+else
+	tar -xvf $tarfile > $outfile
+fi
+if [ $? != 0 ]; then
+	echo ""
+	echo "Error: failed to untar package, output in '$outfile'"
+	exit 1
+fi
+echo "done"
+
+pushd $package
+
+echo -n "Running make uninstall..."
+make uninstall >> $outfile
+makeErrorCode=$?
+if [ $makeErrorCode != 0 ]; then
+	echo ""
+	echo "Error: make uninstall failed, output in '$outfile'"
+	exit $makeErrorCode
+fi
+echo "done"
+
+popd
+
+$RM -r $package
+$RM $tarfile
+
+echo "--Script finished: package '$package' has been uninstalled.--"

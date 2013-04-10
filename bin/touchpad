@@ -1,0 +1,17 @@
+#!/bin/bash
+
+command=$1
+
+if [ "X$command" == "Xoff" ]; then
+	synclient "TouchpadOff=1" #to disable tp entirely
+elif [ "X$command" == "Xon" ]; then
+	synclient "TouchpadOff=0"
+elif [ "X$command" == "Xdefaults" ]; then
+	synclient "PalmDetect=1"
+	synclient "CircularScrolling=1"
+	synclient "CircScrollTrigger=2" #top-right corner
+	synclient "TouchpadOff=0"
+else
+	print 'unknown command'
+	exit 1
+fi

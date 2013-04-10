@@ -1,0 +1,2 @@
+#!/bin/bash
+while true; do ls -la /dev |grep -i ttyusb; date; sleep .2; done

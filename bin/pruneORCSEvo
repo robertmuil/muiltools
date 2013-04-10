@@ -1,0 +1,72 @@
+#!/bin/bash
+#
+# Intended for pruning of the ORCS gen directories created by evolution.
+#
+# Given a certain saveCount (modifieable below), this script will delete all but saveCount of the gen
+# directories. The directories left will be evenly distributed from the 1st to the last of the gen directories.
+# The remaining directories will probably not be exactly the saveCount, because the last directory in the order is ALWAYS kept, and because the arithmetic is coarse integer-based. The number kept should always exceed the saveCount.
+#
+# Parameters:
+#  saveCount	int: number of directories to preserve (rest will be pruned)
+#  safeOp			boolean: operate safely - the directories to be pruned are saved in a directory. if this is false, pruned directories are simply deleted.
+#  pruneDir		string: directory into which the pruned directories are saved, if safeOp is true.
+#
+# rmuil 2009/11/25
+
+#TODO: saveCount should be command line parameter
+
+saveCount=6
+safeOp=true
+pruneDir="./doomed"
+
+dirdesignator="gen"
+
+function ordinalPrint
+{
+	case $(($1 % 10)) in
+		1) echo -n $1st;;
+		2) echo -n $1nd;;
+		3) echo -n $1rd;;
+		*) echo -n $1th;;
+	esac
+}
+
+fullList=$(ls -1 |grep -E "$dirdesignator[0-9]+" | cut -c 4- |sort -n)
+fullArray=( $fullList )
+
+let "fullCount = ${#fullArray[*]}"
+let "step = $fullCount / $saveCount"
+
+echo "requested $saveCount of $fullCount of the directories that start with $dirdesignator"
+echo -n " -> preserving every "
+ordinalPrint ${step}
+echo " directory"
+
+if $safeOp; then
+	if [[ ! -d $pruneDir ]]; then mkdir --parents $pruneDir; fi
+fi
+
+iter=$((0))
+preserved=$((0))
+for f in ${fullArray[*]}; do
+
+	filename="${dirdesignator}${f}"
+
+	mod=$(($iter % $step))
+
+	if (( $mod == 0 || $iter == $fullCount-1 )); then
+		let "preserved++"
+		echo "$iter: $filename preserving ($preserved now preserved)"
+	else
+		#echo -n "$iter: $filename"
+		if $safeOp; then
+			#echo " -> moving to $pruneDir"
+			mv "$filename" "$pruneDir/"
+		else
+			#echo " -> removing"
+			rm -rf "$filename"
+		fi
+	fi
+	let "iter++"
+done
+echo "Finished: preserved $preserved directories."

@@ -1,0 +1,91 @@
+#!/bin/bash
+#
+# This is a recursive implementation of the vimrecover script.
+#
+# This will recover a file from a swap file, invoking a graphical editor if required to
+# resolve differences from the original file.
+#
+# If invoked without the filename, this will search for all swap files under the current directory
+# and attempt to recover all of them one by one.
+#
+# author: robertmuil@gmail.com 2012/12/03
+
+swapfilepattern='.*.sw?'
+
+thisfile=`basename $0`
+
+backupdir=".backup"
+deaddir="todelete"
+
+if [ -z "$1" ]; then
+	echo invoked as search.
+
+	swapfiles=`find . -name "$swapfilepattern"`
+	if [ -z "$swapfiles" ]; then
+		echo "no swapfiles found, everything good."
+		exit 0
+	else
+		echo "swapfiles found: $swapfiles"
+	fi
+	for _swapfile in ${swapfiles}; do
+		swapfile=${_swapfile:2} #prune the ./ from find's output
+		. $0 "${swapfile}"
+	done
+	echo "finished search invocation."
+else
+	echo invoked on "$1"
+
+	swapfile="$1"
+
+	origdir=`dirname "$swapfile"`
+	swapfilename=`basename $1`
+
+	nowstr=`date "+%Y-%m-%dT%H-%M-%S"`
+	swapfiletrunk=${swapfilename%.sw?} #prune the extension from swapfile
+	origfile=${swapfiletrunk:1} #prune beginning dot from swapfile
+	#recoveryfile=`mktemp --tmpdir=./ "recovered.XXXXXX.$origfile"`
+	recoveryfile="${nowstr}.recovered.$origfile"
+	origpath=${origdir}/${origfile}
+
+	#echo "origdir=$origdir"
+	#echo "origfile=$origfile ($origpath)"
+	#echo "recoveryfile=$recoveryfile"
+
+	if [ $origpath == $thisfile ]; then
+		echo "ignoring self ($thisfile)."
+		continue
+	fi
+
+	pushd "$origdir"
+
+	if vim -X -c ":wq! $recoveryfile" -r "$origfile"; then
+		echo "sucessfully recovered to $recoveryfile."
+		rm -v "$swapfilename"
+	else
+		echo "failed to use vim to recover from $swapfile"
+		continue
+	fi
+	if cmp "$recoveryfile" "$origfile"; then
+		echo "No changes discovered for $origfile."
+		if [ ! -d "$deaddir" ]; then
+			mkdir -p "$deaddir"
+		fi
+		mv -v "$recoveryfile" "$deaddir/"
+	else
+		#oldfile=`mktemp --tmpdir=./ "original.XXXXX.$origfile"`
+		oldfile="${nowstr}.original.$origfile"
+		mv "$origfile" "$oldfile"
+		mv "$recoveryfile" "$origfile"
+		if gvimdiff -f "$origfile" "$oldfile"; then
+			echo graphical diff seems to have been successful.
+			if [ ! -d "$backupdir" ]; then
+				mkdir -p "$backupdir"
+			fi
+			mv -v "$oldfile" "$backupdir/"
+		else
+			echo graphical diff failed for "$origfile" and "$oldfile".
+		fi
+	fi
+	popd
+	echo "finished individual invocation."
+fi

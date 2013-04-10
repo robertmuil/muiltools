@@ -1,0 +1,119 @@
+#!/bin/bash
+
+#TODO: determine what the main directory is that will be created by the extracted archive, rather than assuming it will just be the name of the archive minus extension.
+# could do this with tar --list somehow
+
+MV=/bin/mv
+RM=/bin/rm
+
+outfile=installPackage.log
+prefix=$HOME/usr/local
+
+if [ -z $1 ]; then
+	echo "Error: provide package name..."
+	exit 1
+fi
+
+tarfile=${1}
+
+if [ ! -f $tarfile ]; then
+	echo "Error: no package file '$tarfile' found..."
+	exit 1
+fi
+
+package=${tarfile/%.tgz/}
+package=${package/%.gz/}
+package=${package/%.bz2/}
+package=${package/%.tar/}
+
+echo "Installing package '$package'."
+
+echo -n "Uncompressing package file '$tarfile'..."
+if [[ $tarfile =~ .*\.bz2$ ]]; then
+	tar --bzip2 -xvf $tarfile > $outfile
+elif [[ $tarfile =~ .*\.tar\.gz$ || $tarfile =~ .*\.tgz$ ]]; then
+	tar -xzvf $tarfile > $outfile
+else
+	tar -xvf $tarfile > $outfile
+fi
+if [ $? != 0 ]; then
+	echo ""
+	echo "Error: failed to untar package, output in '$outfile'"
+	exit 1
+fi
+echo "done"
+
+if [ -d $package ]; then
+	packagedir="$package"
+else
+	packagedir=`find ./ -maxdepth 1 -name "$package*" -type d | head -n 1`
+	re_yes="^[yY]([eE][sS])?$"
+	echo -n "Warning, '$package' dir doesn't exist... is '$packagedir' right? "
+	read resp
+	if [[ $resp =~ $re_yes ]]; then
+		echo "ok, continuing."
+	else
+		echo "quiting at user request because package directory not determined."
+		exit 1
+	fi
+fi
+pushd $packagedir
+
+if [ -x configure ]; then
+	echo "Running configure --prefix=$prefix..."
+	./configure --prefix=$prefix #--force
+	configureExitCode=$?
+	if [ $configureExitCode != 0 ]; then
+		echo "Error: configure failed."
+		exit $configureExitCode
+	fi
+elif [ -f *.pro ]; then
+	echo "Running qmake-qt4 with PREFIX=$prefix..."
+	qmake "\"PREFIX=$prefix\""
+	qmakeExitCode=$?
+	if [ $qmakeExitCode != 0]; then
+		echo "Error: qmake failed."
+		exit $qmakeExitCode
+	fi
+elif [ -x autogen.sh ]; then
+	echo "Running autogen.sh with --prefix=$prefix..."
+	./autogen.sh --prefix=$prefix #--force
+	configureExitCode=$?
+	if [ $configureExitCode != 0 ]; then
+		echo "Error: configure failed."
+		exit $configureExitCode
+	fi
+else
+	echo "Error: no configure, qmake or autogen.sh files found. Don't know how to configure this project... will attempt make anyway."
+	MAKE_PREFIX_SUFFIX="PREFIX=$prefix"
+fi
+
+if [ ! -f "*akefile" -a -d "build" ]; then
+	cd "build"
+fi
+
+echo -n "Running make..."
+make $MAKE_PREFIX_SUFFIX >> $outfile
+makeErrorCode=$?
+if [ $makeErrorCode != 0 ]; then
+	echo ""
+	echo "Error: make failed, output in '$outfile'"
+	exit $makeErrorCode
+fi
+echo "done"
+
+echo -n "Installing..."
+make install $MAKE_PREFIX_SUFFIX >> $outfile
+makeErrorCode=$?
+if [ $makeErrorCode != 0 ]; then
+	echo ""
+	echo "Error: make install failed, output in '$outfile'"
+	exit $makeErrorCode
+fi
+echo "done"
+
+popd
+
+archivePackage $packagedir
+
+echo "--Script finished: package '$package' has been installed.--"

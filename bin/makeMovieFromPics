@@ -1,0 +1,83 @@
+#!/bin/bash
+#
+# Simple script to turn a series of JPG pictures into an avi file,
+# using one of a few possible encoding schemes.
+#
+# Authored by robertmuil some time early 2011.
+
+
+inputfiles='scaled-IMG*.JPG'
+
+if [ ! -z $1 ]; then
+	FPS=$1
+else
+ 	FPS=25
+fi
+
+#SCALE_GEOMETRY=1024x768 #if set, images will be scaled to this geometry by ImageMagick's convert
+#ROTATE_ANGLE=90 #if set, images will be rotated by this angle by convert
+
+dirname=$(basename $PWD)
+
+let ctr=0
+outputname="${dirname}.$ctr.avi"
+while [ -e $outputname ]; do
+	let ctr=$ctr+1
+	outputname="../${dirname}.$ctr.avi"
+done
+
+#options="w=$WIDTH:h=$HEIGHT:fps=$FPS:type=jpg" #width and height seem not to have an effect
+options="fps=$FPS:type=jpg"
+
+echo "dirname=$dirname"
+echo "inputfiles=$inputfiles"
+echo "outputname=$outputname"
+echo "options="$options
+echo "---"
+
+_inputfiles=${inputfiles}
+if [ ! -z $SCALE_GEOMETRY ]; then #scale
+	echo "scaling images..."
+	for f in $_inputfiles; do 
+		echo -n " + scaling $f..."
+		newf='scaled-'$f
+		if [ -e $newf ]; then
+			echo "already present."
+		else
+			convert $f -scale $SCALE_GEOMETRY $newf
+			echo "done."
+		fi
+	done
+	echo "done."
+	_inputfiles='scaled-'${_inputfiles}
+fi
+
+if [ ! -z $ROTATE_ANGLE ]; then #rotate
+	echo "rotating images..."
+	for f in $_inputfiles; do 
+		echo " ...rotating $f"
+		convert $f -rotate $ROTATE_ANGLE 'rotated-'$f
+	done
+	echo "done."
+	_inputfiles='rotated-'${_inputfiles}
+fi
+
+MPEG4=1
+if [ ! -z $MJPEG ]; then
+	echo "encoding movie as motion-jpeg..."
+	mencoder "mf://${_inputfiles}" -mf $options -o ${outputname} -ovc copy
+elif [ ! -z $MSMPEG4 ]; then
+	opt="mbd=2:keyint=132:vqblur=1.0:cmp=2:subcmp=2:dia=2:mv0:last_pred=3"
+	echo "encoding movie as MS MPEG4-v2 ($opt)..."
+	mencoder "mf://${_inputfiles}" -mf $options -o ${outputname} -ovc lavc -lavcopts vcodec=msmpeg4v2:$opt
+elif [ ! -z $MPEG4 ]; then
+	opt="mbd=2:trell"
+	echo "encoding movie as mpeg4 ($opt)..."
+	mencoder mf://${_inputfiles} -mf $options -o ${outputname} -ovc lavc -lavcopts vcodec=mpeg4:$opt 
+fi
+echo "done encoding."
+
+echo "press enter to see video"
+read #wait for user input
+
+mplayer -fs ${outputname} -loop 0

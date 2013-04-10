@@ -1,0 +1,22 @@
+#!/bin/bash
+#
+# Waits for current mplayer to finish and then plays the files given on command line.
+#
+# robertmuil 2012/01/02
+
+cmd=mplayer
+
+if pgrep $cmd > /dev/null; then
+	date
+	echo "waiting for $cmd to finish"
+fi
+
+while pgrep $cmd > /dev/null; do
+	sleep .5
+	echo -n .
+done
+
+echo "done."
+
+echo "launching $cmd"
+exec $cmd "$@"

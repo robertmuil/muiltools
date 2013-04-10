@@ -1,0 +1,34 @@
+#!/bin/bash
+tmpdir=~/tmp
+
+OLDIFS=$IFS
+IFS=%
+commands="ls -lAR /dev/bus%ls -lA /dev%lsusb%dmesg%" #%sensors"
+
+DIFF=`which diff`
+
+if [ ! -d "$tmpdir" ]; then
+	mkdir "$tmpdir"
+fi
+
+rm $tmpdir/*.initial.log
+
+while true; do
+	date
+	for cmd in $commands; do
+		cmd_=${cmd//[^a-zA-Z0-9-]/_}
+		current=$tmpdir/$cmd_.current.log
+		snapshot=$tmpdir/$cmd_.initial.log
+		IFS=${OLDIFS}
+		if [ ! -f "$snapshot" ]; then
+			$cmd > $snapshot 2> /dev/null
+		fi
+		$cmd > $current 2> /dev/null
+		$DIFF --side-by-side --suppress-common-lines "$snapshot" "$current"
+		if (( $? != 0 )); then
+			/bin/cp $current $snapshot
+		fi
+		IFS=%
+	done
+	sleep 1
+done

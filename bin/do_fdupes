@@ -1,0 +1,3 @@
+#!/bin/bash
+
+fdupes --recurse --noempty --size --delete "$@"

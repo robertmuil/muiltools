@@ -1,0 +1,59 @@
+#!/bin/bash
+
+MV=/bin/mv
+RM=/bin/rm
+
+outfile=archive_installed.log
+archivedir=$HOME/usr/local/archive
+
+if [ -z $1 ]; then
+	echo "Error: provide package name..."
+	exit 1
+fi
+
+package=${1/%\//}
+tarfile=$package.installed.tgz
+
+if [ ! -d $package ]; then
+	echo "Error: no package '$package' found..."
+	exit 1
+fi
+
+echo "Archiving package '$package'."
+echo -n "Running make clean..."
+pushd $package > /dev/null
+make clean > $outfile
+popd > /dev/null
+echo "done"
+
+echo -n "Compressing package to '$tarfile'..."
+tar -czvf $tarfile $package >> $outfile
+if [ $? != 0 ]; then
+	echo ""
+	echo "Error: failed to tar package, output in '$outfile'"
+	exit 1
+fi
+echo "done"
+
+echo -n "Removing package directory..."
+$RM -fr $package
+echo "done."
+
+if [ ! -z "$archivedir" ]; then
+	if [ ! -d "$archivedir" ]; then
+		mkdir -p "$archivedir"
+	fi
+	echo -n "Moving archived package to '$archivedir'..."
+	$MV -f $tarfile $archivedir/
+	echo "done."
+fi
+
+for f in $package.tgz $package.tar.gz $package.tar.bz2; do
+	if [ -f $f ]; then
+		echo -n "Removing original package tar file '$f'..."
+		$RM $f
+		echo "done."
+	fi
+done
+
+echo "--Script finished. Package '$package' archived as '$archivedir/$tarfile'.--"

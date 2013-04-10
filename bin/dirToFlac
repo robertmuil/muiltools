@@ -1,0 +1,47 @@
+#!/bin/bash
+#NB: this will wipe out all wav files in a directory even if they fail to be converted to flac.
+shopt -s nullglob
+
+dir='.'
+[ ! -z "$1" ] && dir="$1"
+echo dir="$dir"
+
+destdirbase='/work/rmuil/MP3'
+[ ! -z "$2" ] && destdirbase="$2"
+destdir="$destdirbase/$dir"
+echo destdir="$destdir"
+
+pushd "$dir"
+echo "decoding with lame..."
+for f in *.{mp3,MP3}; do
+	outf="${f/%.mp3/.flac}"
+	outf="${outf/%.MP3/.flac}"
+	if [ ! -e "$outf" ]; then
+		echo " $f to $outf"
+		lame --decode "${f}";
+	fi
+done
+echo 'done'
+
+echo 'transcode ffmpeg files...'
+for f in *.{m4a,M4A}; do
+	outf="${f/%.m4a/.flac}"
+	outf="${outf/%.M4A/.flac}"
+	if [ ! -e "$outf" ]; then
+		echo "  \"$f\" to \"$outf\""
+		ffmpeg -i "${f}" -f flac "${outf}"
+	fi
+done
+
+echo 'process all decoded files to flac...'
+flac --replay-gain *.wav
+rm -v *.wav
+echo 'done'
+
+if [ ! -z "$destdir" ]; then
+	echo "moving files to $destdir"
+	mkdir -p "$destdir"
+	mv -v *.{mp3,mp4,m4a,M4A} "$destdir/"
+fi
+
+popd
