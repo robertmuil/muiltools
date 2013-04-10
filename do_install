@@ -9,5 +9,5 @@ INST='cp -vu'
 $INST externals/oodiff "$BDIR/"
 
 pushd odt2txt > /dev/null
-make DESTDIR="$LDIR" install
+make DESTDIR="$LDIR" install && make clean
 popd > /dev/null
