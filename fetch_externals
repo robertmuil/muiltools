@@ -1,0 +1,9 @@
+#!/bin/bash
+
+#This is a simple script intended to fetch all external command-line tools I like to have installed.
+# This is used only for those that don't have git-accessible repositories, because those will be
+# handled as sub-modules
+#
+
+#First is oodiff.
+curl http://www-verimag.imag.fr/~moy/opendocument/oodiff > oodiff

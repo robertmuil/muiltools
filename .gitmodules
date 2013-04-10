@@ -1,0 +1,3 @@
+[submodule "odt2txt"]
+	path = odt2txt
+	url = git://repo.or.cz/odt2txt.git
