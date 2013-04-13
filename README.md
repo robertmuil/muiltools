@@ -6,7 +6,7 @@ Quick Start
 ----------
 0. `mkdir -p ~/usr && cd ~/usr` (goes to directory where you want to maintain this)
 1. `git clone git@github.com:robertmuil/muiltools.git` (clones this repository into it)
-2. `cd muiltools && git submodule init` && `git submodules update` (clones all submodules)
+2. `cd muiltools && git submodule init` && `git submodule update` (clones all submodules)
 2. [optional] `./go` (installs the tools, into `~/usr/local`)
 
 Description
