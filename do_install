@@ -4,7 +4,7 @@
 LDIR="$HOME/usr/local"
 BDIR="$LDIR/bin"
 
-INST='cp -vu'
+INST='ln -svfT'
 
 pushd odt2txt > /dev/null
 make DESTDIR="$LDIR" install && make clean
@@ -16,7 +16,7 @@ fi
 
 pushd bin
 for f in *; do
-	$INST "$f" "$BDIR/"
+	$INST "$PWD/$f" "$BDIR/$f"
 done
 
 #TODO: test system architecture
