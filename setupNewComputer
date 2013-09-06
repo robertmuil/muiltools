@@ -6,7 +6,7 @@ shopt -s dotglob  #match hidden files (starting with a dot) also
 #TODO: convert to associative array
 #NB: for xmodmap: a file named .Xmodmap in ~ will automatically by run by xinit.
 #These are the targets to be created by symbolic links to the Personal/config directory
-targets="$HOME/.htoprc $HOME/.Xmodmap $HOME/.Xresources $HOME/usr/bin $HOME/usr/lib $HOME/.config/awesome/rc.lua $HOME/.config/awesome/theme.lua $HOME/.bash_aliases $HOME/.bashrc $HOME/.inputrc $HOME/.zshrc $HOME/.vimrc $HOME/.vim $HOME/.mc/ini $HOME/.mc/panels.ini $HOME/.mc/bindings $HOME/.aliases $HOME/.ipython/profile_default/ipython_config.py $HOME/.ipython/profile_default/startup/ipy_user_focus.py $HOME/.subversion/config $HOME/.subversion/servers $HOME/.gitconfig"
+targets="$HOME/.htoprc $HOME/.Xmodmap $HOME/.Xresources $HOME/usr/bin $HOME/usr/lib $HOME/.config/awesome/rc.lua $HOME/.config/awesome/theme.lua $HOME/.bash_aliases $HOME/.bashrc $HOME/.inputrc $HOME/.zshrc $HOME/.vimrc $HOME/.vim $HOME/.mc/ini $HOME/.mc/panels.ini $HOME/.mc/bindings $HOME/.aliases $HOME/.ipython/profile_default/ipython_config.py $HOME/.ipython/profile_default/startup/ipy_user_focus.py $HOME/.subversion/config $HOME/.subversion/servers $HOME/.gitconfig $HOME/.config/inkscape/keys/default.xml"
 
 #batchSources are directories of files that should all be linked from the sourceDir
 declare -A batchSources
@@ -73,6 +73,7 @@ for f in $targets; do
 		.Xmodmap ) sourceDir="$HOME/Personal/config/X";;
 		.Xresources ) sourceDir="$HOME/Personal/config/X";;
 		servers | config ) sourceDir="$HOME/Personal/config/subversion";;
+		default.xml ) sourceDir="$HOME/Personal/config/inkscape/keys";;
 		*) sourceDir="$HOME/Personal/config";;
 	esac
 	sourceFile=$sourceDir/$ff
