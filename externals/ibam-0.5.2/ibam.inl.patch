@@ -1,0 +1,11 @@
+--- ibam-0.5.2/ibam.inl	2013-10-31 18:05:52.080637688 +0100
++++ ibam-0.5.2/ibam.inl	2013-10-31 18:05:30.622641752 +0100
+@@ -959,7 +959,7 @@
+       acpi.close();
+       apm = new acpi_status();
+    } else {
+-      sysfs.open((sysfs_path+"/BAT1/charge_full").c_str());
++      sysfs.open((sysfs_path+"/BAT0/charge_full").c_str());
+       if(sysfs.is_open()) {
+ #ifdef IBAM_DEBUG
+       cout << "using sysfs" << endl;

@@ -1,0 +1,36 @@
+0.5:
+ o SYSFS support
+ o added hard and soft limits for lowest safe battery percentage
+ o improved seconds correction for ACPI and SYSFS systems
+ o internal changes for improved pbbuttons.berlios.de compatibility
+ o extended PMU support by Matthias Grimm 
+ o bugfix of APM support by Brad Sawatzky and Peter Gaal 
+ o cosmetic change of krell-strings
+
+0.4:
+ o PMU support for Apple computers by Florian Ragwitz
+ o ACPI support 
+ o new improved adaptivity algorithm
+
+0.3:
+ o added "using namespace std" to ibam.hpp
+ o added "make deb" to Makefile
+ o additional profile-logging in .ibam/profile-NNN-battery/charge
+ o plotting of additional profiles
+ o forced same locale on load and save of data
+ o added gkrellm2-support, old gkrellm1-plugin still available
+
+0.2:
+ o prevented continued second counts when battery is fully charged
+ o data from future will now be discarded
+ o prevented second glitches when bios information changed
+ o from now on IBAM will only interpret the bios percentage information
+ o data will now be saved in $HOME/.ibam/
+ o standard derivation included
+ o import function for old data format
+ o initial krell plugin
+ o initial RPM support
+ o switched from relative to absolute limits in plausibility check (see .hpp)
+
+0.1:
+ o Initial release

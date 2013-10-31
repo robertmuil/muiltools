@@ -13,3 +13,9 @@ fi
 
 #First is oodiff.
 curl http://www-verimag.imag.fr/~moy/opendocument/oodiff > "$EXT_DIR"/oodiff
+
+#Second is ibam... todo: implement
+curl http://prdownloads.sourceforge.net/ibam/ibam-0.5.2.tar.gz > "$EXT_DIR"/
+pushd $EXT_DIR
+tar -xzvf ibam-*.tgz
+patch ibam.inl.*.patch

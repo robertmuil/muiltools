@@ -1,0 +1,241 @@
+                    IBAM, the Intelligent Battery Monitor
+
+                        http://ibam.sourceforge.net/
+
+
+1. Description
+
+
+IBAM is an advanced battery monitor for laptops, which uses statistical and
+adaptive linear methods to provide accurate estimations of minutes of
+battery left or of the time needed until full recharge. It is available as
+shell utility, gkrellm plugin and is included in pbbuttons.berlios.de .
+
+Your system needs to have a proc-filesystem and either apmd, acpi, pmu or
+sysfs to be installed.
+
+IBAM is a GPLed Open Source Project. You are coordinally invited to join!
+
+
+2. Building the shell utility
+
+
+First steps with IBAM:
+
+To build IBAM simply enter:
+   make
+
+Then you need to build initial statistics, so enter (*)
+   watch -n10 ./ibam
+
+and unplug the power source from your laptop. IBAM will now save the time
+intervals between changes in battery status, by reading /proc/apm (or the
+acpi or the pmu interface). IBAM will already tell you about its
+estimations, but they will be as inaccurate as the information of the apmd
+or apm-bios. Wait and drink coffee. It should be noted that using one of the
+gkrellm-plugins is an alternative to using the watch-statement.
+
+As soon your battery is empty (hope you didn't lose any data.. ;), replug
+the power and let ibam continue recording the characteristics of your
+system. Meanwhile you may invoke
+   ./ibam -ra --plot
+to get some statistics.
+
+The more often you run or watch ibam, the smoother the statistics will get
+and the more accurate ibam will be. If you enabled the additional profiling
+by "--profile", then you can also compare the statistics to the latest
+measurements, i.e. the last 10 samples (if there are that many):
+   ./ibam -r --plot=10
+
+IBAM assumes, that the BIOS will at least be able to report a remaining
+battery level percentage of 5 percent- for some laptops this is already the
+point of shutdown, so this will be taken into consideration via the so
+called "soft low limit". As soon IBAM sees a lower percentage, this "soft"
+limit decreses to the lowest seen (and therefore somewhat safe) value. If
+your laptop shuts down well above 5 percent, you may increase this soft
+limit using
+   ./ibam --softlowlimit=10
+but this will only work, if IBAM has not seen lower values before. But if
+IBAM is in error, or if you prefer staying away from such low value, you
+may set a hard limit for your lowest safe percentage via:
+   ./ibam --hardlowlimit=10
+To disable the limits, just specify a limit of 0%.
+
+
+3.1. Building the gkrellm2 plugin
+
+
+If you have the appropriate libraries (gtk+-2, gkrellm-devel)
+installed, you may also build the krell-plugin of ibam by entering
+   make krell
+You can test this plugin using
+   gkrellm -p ibam-krell.so
+or copying the library ibam-krell.so into your ~/.gkrellm/plugins/ and
+enabling the plugin within gkrellm after you had restarted it. 
+
+
+3.2. Building the gkrellm1 plugin
+
+
+If you have the appropriate libraries (gtk, imllib, gkrellm-devel)
+installed, you may also build the krell-plugin of ibam by entering
+   make krell1
+You can test this plugin using
+   gkrellm -p ibam-krell1.so
+or copying the library ibam-krell1.so into your ~/.gkrellm/plugins/ and
+enabling the plugin within gkrellm after you had restarted it. 
+
+
+3.3. Using the gkrellm-plugin
+
+
+On the plugin the marker will always show the battery percentage. When
+running on batteries, it will show "batt" and the adaptively computed time
+left. When charging it will show "chrg" and the adaptively computed time
+left until full charge. If the battery is full, the text will be "full" with
+the total battery time. 
+
+The gkrell-plugin will read the current profile only once at start and
+update the profile when necessary. Thus you may also create the initial
+profile with this plugin. You can always use the ibam-command to get more
+detailed statistics.
+
+You can find gkrellm at:
+http://www.gkrellm.net/
+
+
+4. Installing
+
+
+You may install ibam using the
+make install
+command. This will install ibam into /usr/local/bin and the gkrellm-plugin
+in /usr/local/libs/gkrellm/plugins if you had built the plugin as well. You
+may also create a RPM with
+   make rpm
+which can be installed as root using the rpm utility
+   rpm -Uvh ibam-(VERSION)-1.i386.rpm
+It is planned to create a debian package by
+   make deb
+"which will compile a debian package including debian source packages, 
+all of them unsigned (-us unsigned source -uc unsigned compiled) using 
+fakeroot as get_root_cmd. dpkg-buildpackage checks for build-depends, 
+however fakeroot will not be in the build-depends since anyone is free to
+use su, sudo, super...."- the latter was contributed by Martin Wuertele. But
+yet it's untested and I don't know how to do it... ;)
+
+
+5. File formats
+
+
+The file formats changed since 0.1, but you may import the old profiles
+using the --import option in the directory the 0.1 version was started in.
+
+IBAM will now save the profiles and other informations in the directory
+~/.ibam where you will find the files ibam.rc, battery.rc and charge.rc.
+Thus if you plan to use the same statistics for different users, make sure
+that this directory is soft-linked to all participants and with appropriate
+permissions on it. Here are the current file structures:
+
+ibam.rc: (current ibam status)
+0.5     1131300315      97      1.0523	2       2	1       23	0       1	5	0
+
+The first number describes the version of IBAM that create this file. The
+next is the time-stamp when IBAM noticed the last change in APM status. The
+third number shows the last recorded APM battery percentage. The fourth
+number shows the current adaptivity factor, followed by the number of
+measurements that were taken into consideration. The sixth shows the last
+status (charging, on battery or undefined). The seventh number defines 
+whether profiles should be recorded, followed by the number of the current
+profile and the next says if this profile is active right now. The last two
+numbers are the soft and hard lowest safe limits for battery percentages,
+zero if they are disabled.
+
+battery.rc and charge.rc: (battery and charge profiles)
+[...]
+94      109.852 26.4915 25
+93      109.992 26.3673 25
+[...]
+
+Here you can see the average number in the second column of seconds per
+percentage unit in first column. The third column shows the standard
+derivation (sqrt(s^2)) the fourth the number of samples the statistics in
+these lines are based on.
+
+
+6. ALPHA status
+
+
+This software is in alpha-status, please tell me about your experiences and
+send me your battery and charge profiles for further analysis. Thanks to
+profiles that were sent to me, it turned out that the accuracy can even be
+increased by more intelligent profiling. So far you may alread start
+creating the profiles by enabling the additional per cycle profiling, but
+yet this information will not be used by the current version, but hopefully
+in one of the future releases.
+
+
+7. Future Plans and Optional Profiling
+
+
+Ibam gains its accuracy by collecting statistics about (dis)charge time for
+each percentage. You may visualize this as simple table where each
+percentage is mapped to a time period. Yet there are different "profiles"
+one cannot neglect, such as different power saving modes. Currently ibam
+tries to deal with this by means of linear adaption: On each percentage
+step the ratio of expected to estimated time is computed and averaged
+over the cycle so far. This averaged ratio is used as an adaption to
+different power demands- but as batteries are highly unlinear, this is just
+a rough estimate.
+
+The mathematical solution is to introduce statistics based on current
+percentage and history. The tables would grow huge, but may stay managable
+by means of compression of sparse matrices. Yet each estimate computation
+would yield up to a hundred matrix multiplications with approximately
+100x100 cell matrices. This gets to a point where the measurement may even
+influence power consumption due to excessive cpu usage... ;)
+
+But looking at the sparsity of the matrices, which we should assume, we
+recognize the profiles mentioned before: These will be certain paths the
+(dis)charge will follow more or less accurately. Thus it's reasonable just
+to record a sufficiently high number of paths and compute the distance of
+the current measurements to the paths we saw before and take a
+"distance-weighted average" of our memory as an estimation. This method
+incorporates the advantages of the old method, but uses the information of
+the more general method, yet using far less computational power- limited by
+the number of profile-realizations we are keeping.
+
+Therefore enable (./ibam --profile) the additional profiling of ibam to
+already collect data for the next-generation ibam, which will then give you
+even far more accurate results than the current version.
+
+
+8. Author and Contact address
+
+
+Sebastian Ritterbusch, IBAM@ritterbusch.de
+
+
+Special thanks go to:
+
+Mohanty Mitrabhanu	for his scientific paper mentioning ibam
+Dan Egnor               for his sweetcode article
+Martin Wuertele		for the debian port
+Seth Golub		for code improvements
+Misha Nasledov		for the gkrellm2-patch
+Matthew Richardson	for the gentoo support
+Florian Ragwitz         for the PMU support
+Matthias Grimm          for the extended PMU support and pbbuttons.berlios.de
+Peter Gaal		for testing and the APM bugfix
+Brad Sawatzky           for the same APM bugfix
+
+and all others for their motivating mails! :)
+
+
+9. Footnote
+
+
+(*) On some RedHat and Mandrake Distributions (as of Aug 2001) "watch"
+shows redraw errors in the KDE terminal. You can prevent this from happening
+by changing the TERM variable before:
+   export TERM=xterm-color

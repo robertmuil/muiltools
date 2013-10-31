@@ -1,0 +1,79 @@
+This is an excerpt of the Project Report 
+
+   "Power Management For Laptops Running Linux: 
+    Using Linear Regression To Predict Battery Usage"
+
+   of Mitrabhanu Mohanty at Texas A&M University. 
+
+He kindly gave me his permission to publish the part of his report covering
+the theory behind ibam. In his project he also developed another battery
+monitor, called monx, which uses a different and also promising battery 
+model. I would like to thank Mitrabhanu Mohanty for the interesting
+discussions we had and of course for mentioning ibam in the chapter about
+"Related Work".
+
+Sebastian Ritterbusch.
+
+--------------------------------------------------------------------------
+
+
+[...]
+
+
+2. Related Work
+
+
+Although there are several APM based battery monitoring utilities available
+[2, 3, 4, 5], most of them simply read the estimates provided by the apmd
+daemon and display it. Only IBAM uses statistical modeling techniques to
+improve the accuracy of the values provided by the apmd daemon.
+
+The basic idea behind IBAM is to record the time it takes for the charge
+percentage to move from one value to the other. From this, it calculates the
+delta changes and the remaining time estimate is determined by the summation
+of the delta changes.  To be a little bit more specific, the underlying
+assumption in IBAM is that the time needed for a percentage step (T_c) is a
+continuous random variable with mean t_c and standard deviation d_c. It then
+uses the fact that the mean of all measured data for a percentage step
+change (say from 70% to 69%) is converging to the average of the normal
+distribution (i.e. T_70). Thus, to determine the time taken for the charge
+percentages to drop from say 70% to 65%, IBAM uses the random variable T =
+T_70 + T_69 + T_68 + T_67 + T_66 to determine the mean time needed to go
+from 70% charged to 65% charged.
+
+The accuracy of the estimates provided by IBAM depends on several factors.
+It assumes that the power supplied remains more or less constant with only
+some random fluctuations in the BIOS measurements. These days almost every
+laptop has power saving features available, and this introduces
+complications with the above assumption. In order to counter this, IBAM uses
+an additional linear model to improve the accuracy.
+
+The accuracy of IBAM improves as more data is collected from charging and
+discharging cycles of the battery. It was found that although the initial
+predictions of IBAM were almost the same as that provided by the BIOS, they
+improved considerably after a few charging/discharging cycles.
+
+[...]
+
+
+8. References
+
+
+[...]
+
+[1] 	IBAM, S. Ritterbusch, Available at
+	http://sourceforge.net/projects/ibam/, August 2001.
+
+[2]	KBatt, J. Orosz, Available at
+	http://sourceforge.net/projects/kbatt/, October 2001.
+
+[3]	Battstat, J. Pehrson, Available at
+	http://freshmeat.net/projects/battstatapplet/, July 2000.
+
+[4]	wmapm, M.G. Henderson, Available at 
+	http://nis-www.lanl.gov/~mgh/, January 2000.
+
+[5]	asapm, Tigr, Available at 
+	http://freshmeat.net/projects/asapm/, July 1998.
+
+[...]
