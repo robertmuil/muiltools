@@ -14,10 +14,13 @@ if [ ! -d "$BDIR" ]; then
 	mkdir -pv "$BDIR"
 fi
 
-pushd bin
+pushd bin > /dev/null
 for f in *; do
-	$INST "$PWD/$f" "$BDIR/$f"
+	if [ -x "$f" ]; then
+		$INST "$PWD/$f" "$BDIR/$f"
+	fi
 done
+popd > /dev/null
 
 #TODO: test system architecture
 
