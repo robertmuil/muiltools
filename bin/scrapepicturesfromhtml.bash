@@ -1,4 +1,5 @@
 #!/bin/bash
+#Author: Robert Muil
 
 htmlfile=$1
 urlroot=$2

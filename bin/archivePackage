@@ -1,4 +1,5 @@
 #!/bin/bash
+#Author: Robert Muil
 
 MV=/bin/mv
 RM=/bin/rm

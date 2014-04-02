@@ -1,0 +1,117 @@
+#!/bin/bash
+
+VOLFNAME="$HOME/Personal/docs/accounts.tc"
+MNTDIR="$HOME/accts"
+
+DBG_LVL=1
+dbg1 () {
+	if (( $DBG_LVL >= 1 )); then
+		echo $*
+	fi
+}
+
+command_exists () {
+	command -v "$1" &> /dev/null ;
+}
+
+#test for what binary we are using
+USETCPLAY=0
+if [ "X$1" == "X-r" ]; then
+	dbg1 "forcing realcrypt..."
+	TC=realcrypt
+elif command_exists tcplay; then
+	dbg1 "got tcplay..."
+	USETCPLAY=1
+elif command_exists truecrypt; then
+	dbg1 "got truecrypt..."
+	USETCPLAY=0
+	TC=truecrypt
+elif command_exists realcrypt; then
+	dbg1 "got realcrypt..."
+	USETCPLAY=0
+	TC=realcrypt
+else
+	echo "Have neither truecrypt, realcrypt, nor tcplay. Please install one."
+	exit 1
+fi
+
+is_mounted () {
+	#returns 0 if mounted, 1 otherwise
+	retval=1
+	if (( $USETCPLAY )); then
+		tcinfo=`sudo losetup -j "$VOLFNAME"`
+		dbg1 "tcinfo=$tcinfo"
+		if [ ! -z "$tcinfo" ]; then
+			dbg1 " -> is mounted"
+			retval=0
+		fi
+	else
+		if [ -e /media/truecrypt*/accounts.odt ]; then
+			retval=0
+		fi
+	fi
+	return $retval
+}
+
+print_loop_devname () {
+	#/dev/loop0: []: (/home/robert/Personal/docs/accounts.tc)
+	#<devname>: <something>: (<filename>)
+	yeah=`sudo losetup -j "$VOLFNAME"`
+	devname=`echo $yeah | cut -d: -f1`
+	echo $devname
+}
+
+do_mount () {
+	if (( $USETCPLAY )); then
+		dbg1 "adding loopback device for $VOLFNAME"
+		devname=`sudo losetup --find --show "$VOLFNAME"`
+		echo "Mapping '$devname' to 'accounts' device with tcplay..."
+		sudo tcplay --map="accounts" --device=$devname
+		if [ ! -d $MNTDIR ]; then
+			mkdir $MNTDIR
+		fi
+		myuid=`id -u`
+		mygid=`id -g`
+		dbg1 "mounting 'accounts' device on '$MNTDIR'..."
+		sudo mount -v -t fuse -ouid=$myuid,gid=$mygid /dev/mapper/accounts $MNTDIR
+	else
+		dbg1 "mounting file with $TC..."
+		$TC -t -k "" --protect-hidden=no --mount $VOLFNAME
+	fi
+}
+
+
+do_unmount () {
+	if (( $USETCPLAY )); then
+		dbg1 "unmounting '$MNTDIR'..."
+		sudo umount -v $MNTDIR
+		rmdir -v $MNTDIR
+		devname=`print_loop_devname`
+		dbg1 "unmapping accounts..."
+		sudo dmsetup remove accounts
+		dbg1 "detaching $devname..."
+		sudo losetup -v --detach "$devname"
+	else
+		dbg1 "dismounting all volumes with $TC..."
+		$TC -t --dismount
+	fi
+}
+
+if is_mounted; then
+	echo "Accounts appears to be mounted."
+	echo "Dismount?"
+	read resp
+	dbg1 "resp=[$resp]"
+	if [[ $resp =~ ^[nN][oO]?$ ]]; then
+		dbg1 "opening... "
+		soffice "$MNTDIR"/accounts.odt & #/media/truecrypt*/accounts.odt &
+	else
+		dbg1 "ok, unmounting..."
+		do_unmount 
+	fi
+else
+	dbg1 "mounting..."
+	do_mount
+	dbg1 "mounted, opening..."
+	soffice "$MNTDIR"/accounts.odt & #/media/truecrypt*/accounts.odt &
+fi

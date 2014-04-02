@@ -1,0 +1,10 @@
+#!/bin/bash
+echo -n Waiting for gate...
+while ! ping -w 1 -c 1 gate.ikw.uos.de; do
+	echo -n .
+	sleep 2
+done
+echo got it, running unison.
+unison -batch uniPersonal
+#unison -batch uniStudy
+#unison -batch uniWork

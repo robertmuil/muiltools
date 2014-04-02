@@ -1,4 +1,5 @@
 #!/bin/bash
+#Author: Robert Muil
 shopt -s nullglob #when no matches occur, do nothing.
 shopt -s extglob #enable extended patterns in filename expansion (globbing)
 

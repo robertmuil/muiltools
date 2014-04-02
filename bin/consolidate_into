@@ -1,4 +1,5 @@
 #!/bin/bash
+#Author: Robert Muil
 
 #first parameter is the directory into which all files in current directory are to be consolidated.
 

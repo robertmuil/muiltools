@@ -1,4 +1,5 @@
 #!/bin/bash
+#Author: Robert Muil
 
 #TODO: determine what the main directory is that will be created by the extracted archive, rather than assuming it will just be the name of the archive minus extension.
 # could do this with tar --list somehow

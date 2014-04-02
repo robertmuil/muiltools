@@ -1,0 +1,4 @@
+#!/bin/bash
+
+info=$(eval "$*" 2>/dev/null)
+notify-send -t $((1000+500*`echo -n $info | wc -w`)) -u low -i info "$*" "$info" || exit 2

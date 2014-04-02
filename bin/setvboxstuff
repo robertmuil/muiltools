@@ -1,0 +1,3 @@
+VBoxManage setextradata "openSuse" "VBoxInternal/Devices/e1000/0/LUN#0/Config/guestssh/Protocol" TCP
+VBoxManage setextradata "openSuse" "VBoxInternal/Devices/e1000/0/LUN#0/Config/guestssh/GuestPort" 22
+VBoxManage setextradata "openSuse" "VBoxInternal/Devices/e1000/0/LUN#0/Config/guestssh/HostPort" 2222

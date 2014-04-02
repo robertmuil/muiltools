@@ -2,7 +2,7 @@
 #
 # Waits for current mplayer to finish and then plays the files given on command line.
 #
-# robertmuil 2012/01/02
+# Author: Robert Muil 2012/01/02
 
 cmd=mplayer
 

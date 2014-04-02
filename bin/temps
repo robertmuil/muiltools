@@ -1,0 +1,6 @@
+#!/bin/bash
+
+while true; do
+	sensors 2>/dev/null | grep -E "fan|temp1:[^(]*\("
+	sleep 1;
+done

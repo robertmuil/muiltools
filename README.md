@@ -2,6 +2,8 @@ muiltools
 =========
 A selection of primarily command-line tools often used (atm on linux systems), which I previously maintained with unison (and then Wuala) syncing across systems.
 
+Not everything in the bin directories is my own creation, but the external stuff should be commented as such.
+
 Quick Start
 ----------
 0. `mkdir -p ~/usr && cd ~/usr` (goes to directory where you want to maintain this)
@@ -18,11 +20,10 @@ Under the `bin...` directories are binary files:
 
 Details
 -------
-Here's some notes of scripts I've written here.
+A short description of the scripts that I wrote:
 
 * `blank`				- blanks screen with DPMS
 * `cameraControl`	- takes a photo using gphoto2 on every keypress
-
 
 * `consolidate_into`	- moves files from current directory to a target directory, and links are created in the current location
 
@@ -30,12 +31,12 @@ Here's some notes of scripts I've written here.
 * `fixMatlab`
 * `fixSPSS`
 
-* `installPackage`
+* `installPackage` - these three perform the normal drudgery of configuring and making a tar-ball-type package on a unix type system. Also archives the configured made package to allow uninstallation.
 * `archivePackage`
 * `uninstallPackage`
 
-* `menqueue`
 * `mresume`   - this is cool: wrapper script for mplayer that automatically bookmarks and resumes
+* `menqueue`  - also rather cool even if I say so myself: waits for current mplayer to complete and then plays whatever's on the command line. 
 * `makeMovieFromPics`
 
 * `pruneORCSEvo` - cleaning script, very specific to a particular project
