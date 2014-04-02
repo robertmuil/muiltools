@@ -1,0 +1,19 @@
+#!/bin/bash
+
+echo "NB: DANGER!"
+echo "This will remove all backup files from this entire directory recursively."
+echo "NB: DANGER!"
+echo "Type 'ok' and press enter to continue, Ctrl-C to abort."
+read blah
+if [ X"$blah" = X"ok" ]; then
+	echo Alright, here goes...
+else
+	echo Aborting.
+	exit
+fi
+
+find ./ -name "*~" -exec rm -rfv {} \;
+
+find ./ -name ".backup" -exec rm -rfv {} \;
+
+find ./ -name "*.bak*" -exec rm -rfv {} \;

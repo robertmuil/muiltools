@@ -1,0 +1,13 @@
+#!/bin/bash
+
+if [ ! -d bin-arch ]; then
+	if [ `getconf LONG_BIT` = "64" ]; then
+		echo "64-bit architecture: linking bin-x64 to bin-arch"
+		ln -s bin-x64 bin-arch
+	else
+		echo "32-bit architecture: linking bin-x86 to bin-arch"
+		ln -s bin-x86 bin-arch
+	fi
+else
+	echo "bin-arch already exists."
+fi

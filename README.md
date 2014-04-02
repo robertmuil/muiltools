@@ -38,13 +38,17 @@ Here's some notes of scripts I've written here.
 * `mresume`   - this is cool: wrapper script for mplayer that automatically bookmarks and resumes
 * `makeMovieFromPics`
 
-* `pruneORCSEvo`
+* `pruneORCSEvo` - cleaning script, very specific to a particular project
 * `recoverVim`  - abortive attempt at automating recovery from vim crashes
-* `cleanTex`  		- removes temp tex files from current directory recursively (up to 2 levels)
+* `cleanTex`		- removes temp tex files from current directory recursively (up to 2 levels)
+* `cleanBak`		- removes backup files, USE CAREFULLY
+
 * `rename-with-date.sh`
 
 
 * `scrapepicturesfromhtml.bash`
+
+* `setupNewComputer` - this sets up links to point to my config files, which are synced with wuala (not stored here). It also creates the bin-arch link to point to either bin-x86 or bin-64
 
 * `startMatlab`
 * `temps` - just monitors temperatures from `sensors` command to command line

@@ -1,7 +1,12 @@
 #specific to this project
+bin-arch
 
 # general
 .backup
+*~
+
+#vim swap
+.*.sw?
 
 # built application files
 *.apk
