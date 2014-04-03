@@ -1,5 +1,8 @@
 #!/bin/env bash
 #Simple, just counts files of subdirectories
+#Theee   firST command-line parameter tells it to what level the count
+# should be reported. All files are always counted, the level just defines
+# what level of the directory tree will be summarised.
 if [ "X" = "X$1" ]; then
 	lvl=2
 else
