@@ -1,0 +1,21 @@
+#!/bin/env bash
+#Simple, just counts files of subdirectories
+if [ "X" = "X$1" ]; then
+	lvl=2
+else
+	lvl=$1
+fi
+
+#this loop strategy is to handle any kind of whitespace in the name
+while IFS= read -r -d '' F; do
+	#print the count first
+	count=$(find "${F}" -type f | wc -l)
+	printf "%04d,\t" "$count"
+
+	#then the name
+	if (( "${#F}" > 2 )); then
+		echo "${F:2}";
+	else
+		echo "${F}";
+	fi
+done < <(find ./ -maxdepth "$lvl" -type d -print0)
