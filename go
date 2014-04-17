@@ -14,7 +14,13 @@ if [ $isFedora ]; then
 	sudo yum group install 'C Development Tools and Libraries'
 	sudo yum group install 'Development Tools'
 	sudo yum install vim-enhanced vim-X11
+	sudo yum install zsh
+
+	sudo yum install numpy scipy ipython python-matplotlib
+	sudo yum-builddep python-matplotlib
 fi
+
+chsh -s $(which zsh)
 
 # Grab my git
 # this might be a bit circular because I'll probably store this script in git, but I can at least download it and run it.
