@@ -6,10 +6,8 @@ Not everything in the bin directories is my own creation, but the external stuff
 
 Quick Start
 ----------
-0. `mkdir -p ~/usr && cd ~/usr` (goes to directory where you want to maintain this)
-1. `git clone git@github.com:robertmuil/muiltools.git` (clones this repository into it)
-2. `cd muiltools && git submodule init` && `git submodule update` (clones all submodules)
-2. [optional] `./go` (installs the tools, into `~/usr/local`)
+0. Download go script
+1. Run it.
 
 Description
 -----------
@@ -49,7 +47,7 @@ A short description of the scripts that I wrote:
 
 * `scrapepicturesfromhtml.bash`
 
-* `setupNewComputer` - this sets up links to point to my config files, which are synced with wuala (not stored here). It also creates the bin-arch link to point to either bin-x86 or bin-64
+* `link_dotfiles` - (formerly setupNewComputer) this sets up links to point to my config files, which are synced with wuala (not stored here). It also creates the bin-arch link to point to either bin-x86 or bin-64
 
 * `startMatlab`
 * `temps` - just monitors temperatures from `sensors` command to command line
