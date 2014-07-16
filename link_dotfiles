@@ -44,7 +44,7 @@ for targetDir in ${!batchSources[@]}; do
 			if [ ! -d "$backupDir" ]; then
 				mkdir -p "$backupDir"
 			fi
-			cp -br "${target}" "$backupDir/"
+			cp -r --backup=numbered "${target}" "$backupDir/"
 		fi
 		ln -svfT "${src}" "${target}"
 	done
@@ -58,10 +58,10 @@ fi
 
 for f in $targets; do
 	if [ -f "$f" ]; then
-		cp -b "$f" $backupDir
+		cp --backup=numbered "$f" $backupDir
 	fi
 	if [ -d "$f" ]; then
-		cp -br "$f" $backupDir/
+		cp --backup=numbered -r "$f" $backupDir/
 	fi
 	ff=`basename "$f"`
 	case $ff in
