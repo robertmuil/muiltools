@@ -1,0 +1,51 @@
+#!/bin/bash
+#
+# This clones a repository to a remote server, as a bare copy,
+# and makes this new repository a remote
+# repository of the current one. SSH protocol is used.
+
+orig_repo="$1"
+srv="$2"
+remotepath="$3"
+remotebranch="$4"
+remotename="$5"
+usage () {
+	echo "$0 <repository_to_clone> <server> <remote_path> [<remote_branch> [<remote_name>]]"
+}
+
+if [ -z "$orig_repo" -o -z "$srv" -o -z "$remotepath" ]; then
+	usage;
+	exit 1
+fi
+
+echo orig_repo=$orig_repo
+echo server=$srv
+echo remotepath=$remotepath
+if [ ! -z "$remotebranch" ]; then
+	echo remotebranch=$remotebranch
+fi
+if [ -z "$remotename" ]; then
+	remotename="remote_repo"
+fi
+echo remotename=$remotename
+
+bare_repo="${orig_repo}.git"
+echo bare_repo=$bare_repo
+
+git clone --bare "$orig_repo" "${bare_repo}"
+
+echo "copying from \"${bare_repo}\" to \"${remotepath}\" on \"${srv}\"..."
+scp -r "${bare_repo}" "${srv}:${remotepath}"
+
+echo "Configuring local - remote link"
+pushd "${orig_repo}"
+if git remote add "${remotename}" "ssh://${USER}@${srv}/${remotepath}/${bare_repo}"; then
+	if [ ! -z "$remotebranch" ]; then
+		echo "Fetching upstream..."
+		git fetch "$remotename"
+		echo "Setting upstream branch to track."
+		git branch --set-upstream-to "$remotename"/"$remotebranch"
+	fi
+fi
+popd
+

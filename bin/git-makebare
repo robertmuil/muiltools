@@ -1,0 +1,59 @@
+#!/bin/bash
+#
+# Converts a repository into a bare repository. Use on servers.
+
+repo="$1"
+
+require_clean_work_tree () {
+	#got this from http://stackoverflow.com/a/3879077/480534
+    # Update the index
+    git update-index -q --ignore-submodules --refresh
+    err=0
+
+    # Disallow unstaged changes in the working tree
+    if ! git diff-files --quiet --ignore-submodules --
+    then
+        echo "you have unstaged changes:"
+        git diff-files --name-status -r --ignore-submodules -- >&2
+        err=1
+    fi
+
+    # Disallow uncommitted changes in the index
+    if ! git diff-index --cached --quiet HEAD --ignore-submodules --
+    then
+        echo "your index contains uncommitted changes:"
+        git diff-index --cached --name-status -r --ignore-submodules HEAD -- >&2
+        err=1
+    fi
+
+    if [ $err = 1 ]
+    then
+        echo "Please commit or stash them."
+    fi
+	return $err
+}
+
+if [ ! -d "$repo" ]; then
+	echo "No directory '$repo'. Exiting"
+	exit 1
+fi
+
+if [ ! -d "$repo/.git" ]; then
+	echo "No .git folder. Exiting."
+	exit 2
+fi
+
+pushd "$repo"
+#determine if working copy is clean...
+if require_clean_work_tree; then
+	echo "Working copy is clean, proceeding to make bare..."
+else
+	exit 3
+fi
+popd
+
+mv "$repo/.git" "${repo}.git"
+git --git-dir="${repo}.git" config core.bare true
+mv -v "$repo" "${repo}-old_working_copy"
+
+echo "Finished. Bare repository available at ${repo}.git"
