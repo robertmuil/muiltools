@@ -1,0 +1,2 @@
+#to fix Eclipse on Ubuntu 14.04 with KDE
+export SWT_GTK3=0
