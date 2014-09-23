@@ -1,0 +1,3 @@
+prefenc=UTF-8
+stdoutenc=None
+console
