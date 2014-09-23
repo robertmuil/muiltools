@@ -1,0 +1,17 @@
+#!/bin/bash
+
+elffile=file.txt
+
+echo prefix=$(dirname $0)
+
+if [ -z $fesf ]; then
+	echo empty
+fi
+
+if (( $# == 2 )); then
+	elffile=$1
+fi
+
+if [ ! -f $elffile ]; then
+	echo "Cannot find $elffile"
+fi

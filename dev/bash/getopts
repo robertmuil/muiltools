@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+while getopts "abc:d" opt; do
+	case $opt in
+		a) echo option a!;;
+		b) echo option b;;
+		c) echo option c with arg "$OPTARG";;
+	esac
+done
+
+shift $((OPTIND-1))
+
+echo $1
+echo $2

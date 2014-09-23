@@ -1,0 +1,17 @@
+#!/bin/bash
+
+mkdir -p "hi/there"
+
+pushd hi
+
+echo `pwd`
+
+pushd there
+
+echo `pwd`
+
+exit 0
+
+popd
+
+popd
