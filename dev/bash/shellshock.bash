@@ -37,3 +37,17 @@ env anyoldname='() { :;}; echo your bash is vulnerable with any env var name' ba
 echo "test 4"
 env blahblah='() { :;}; echo YOUR SYSTEM SHELL IS VULNERABLE!' sh -c "echo test 4 finished"
 
+echo "test 5"
+#Test the exploit via the SSH_ORIGINAL_COMMAND env var of ssh:
+ssh -o 'rsaauthentication yes' 0 '() { ignored; }; echo YOUR SYSTEM IS REMOTELY EXPLOITABLE!!!'
+echo "test 5 finished"
+
+#Set HOSTS_TO_PROBE to a file that lists hosts if you want this to probe remotely.
+# Careful with this. Admins might get irritated.
+if [ ! -z "$HOSTS_TO_PROBE" ]; then
+	for host in `cat "${HOSTS_TO_PROBE}"`; do
+		echo "test 6 '$host'"
+		ssh -o 'rsaauthentication yes' 0 '() { ignored; }; echo REMOTE SYSTEM IS EXPLOITABLE!!!' "$host"
+		echo "test 6 '$host' finished"
+	done
+fi
