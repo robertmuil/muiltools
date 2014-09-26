@@ -10,7 +10,10 @@
 # that contains the malformed code, it will be exploited.
 #
 # - NB: doesn't seem to occur with a named function...
-# - NB: typically /bin/sh is used, and if this doesn't point to bash, the system won't be vulnerable. On my fedora, for example, it is dash, not bash.
+# - NB: typically /bin/sh is used, and if this doesn't point to bash, the system won't be vulnerable. On my ubuntu system, for example, it is dash, not bash.
+#
+# Update: as of ~14:30 2014-09-26, the bash in the Ubuntu 14.04 repositories is fixed.
+# 		-> but bash on fedora release 20 is not!
 #
 # ':' is a shell builtin which does nothing beyond expanding the arguments
 
