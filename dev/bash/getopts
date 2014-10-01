@@ -1,14 +1,24 @@
 #!/usr/bin/env bash
 
-while getopts "abc:d" opt; do
-	case $opt in
-		a) echo option a!;;
-		b) echo option b;;
-		c) echo option c with arg "$OPTARG";;
-	esac
+while getopts ":" opt; do
+	:
 done
+
+echo "$@"
+echo "${BASH_ARGV[*]}"
+echo "cl arg $OPTIND: ${BASH_ARGV[$OPTIND]}"
+
+all="$@"
 
 shift $((OPTIND-1))
 
-echo $1
-echo $2
+echo "1=$1"
+echo "2=$2"
+
+for f in $all; do
+	echo " - $f"
+done
+echo "---"
+for f in "$@"; do
+	echo " - $f"
+done

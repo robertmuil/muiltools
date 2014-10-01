@@ -128,16 +128,16 @@ Main ()
 	Die "missing FILE1 argument."
     fi
 
-    svnfile="$(dirname "$file1")/.svn/text-base/${file1##*/}.svn-base"
-
     if [ ! "$file2" ]; then
-        if [ -f "$svnfile" ]; then
-	    file2="$file1"
-	    file1="$svnfile"
-        else
-	    Die "missing FILE2 argument" \
-		"(tried SVN base file, but it doesn't exist: $svnfile)"
-        fi
+	svnfile="/tmp/original.$file1"
+	svn cat -r HEAD $file1 > $svnfile
+	if [ $? -eq 0 ]; then
+            file2="$file1"
+            file1="$svnfile"
+	else
+            Die "missing FILE2 argument" \
+                "(tried SVN base file, but it doesn't exist)"
+	fi
     fi
 
     if [ -d "$file1" ]; then

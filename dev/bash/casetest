@@ -1,0 +1,10 @@
+#!/bin/bash
+group='?'
+case $1 in
+	[nN][lL] | [xX][xX] )
+		group='1';;
+	'fr' | 'yy')
+		group='2';;
+esac
+		
+echo $1 in group $group

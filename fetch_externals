@@ -11,11 +11,17 @@ if [ ! -d "$EXT_DIR" ]; then
 	mkdir -v -p "$EXT_DIR"
 fi
 
-#First is oodiff.
-curl http://www-verimag.imag.fr/~moy/opendocument/oodiff > "$EXT_DIR"/oodiff
-
-#Second is ibam... todo: implement
-curl http://prdownloads.sourceforge.net/ibam/ibam-0.5.2.tar.gz > "$EXT_DIR"/
 pushd $EXT_DIR
+#First is oodiff.
+curl http://www-verimag.imag.fr/~moy/opendocument/oodiff > oodiff
+
+#Second is ibam... 
+curl http://prdownloads.sourceforge.net/ibam/ibam-0.5.2.tar.gz > ibam-0.5.2.tar.gz
 tar -xzvf ibam-*.tgz
 patch ibam.inl.*.patch
+
+#Third is shell-scripting recipes
+curl `cat ssr-scripts.url` > ssr-scripts.tar.gz
+tar -xzvf ssr-scripts.tar.gz
+
+popd
