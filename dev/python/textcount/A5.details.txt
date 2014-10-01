@@ -1,0 +1,7 @@
+From Word 2013:
+ - chars no space: 3412
+ - chars w/ space: 3907
+ - words: 513
+ - lines: 80
+
+
