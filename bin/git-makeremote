@@ -3,49 +3,113 @@
 # This clones a repository to a remote server, as a bare copy,
 # and makes this new repository a remote
 # repository of the current one. SSH protocol is used.
+#
+# This implements a push-style of cloning, which is necessary, for example,
+# in the case that one does not have individual access to the server but
+# can only login as a group user: in this case, initiating a clone from the
+# server would require putting credentions for *this* repository in the group
+# account of the server.
+
+usage () {
+	echo "Usage:"
+	echo ""
+	echo "`basename $0` [-B] [-t] <repository_to_clone> <server> <remote_path> [<remote_name>]"
+	echo ""
+	echo " -B: don't make remote a bare copy (i.e. allow it to have a working copy)."
+	echo " -t: set local branch to track corresponding remote branch (upstream)."
+	echo " -n: no-action - don't actually do anything, just show what would be done."
+	echo ""
+	echo " <repository_to_clone>: local repository to clone."
+	echo " <server>: the full server URL to clone to, including username if required."
+	echo " <remote_path>: the base directory under which the remote repo will be placed."
+	echo " <remote_name>: name to refer to the remote repository from this repository (defaults to first component of server)."
+	exit 1
+}
+
+tmpdir="tmp"
+
+remote_bare=true
+track_upstream=false
+do_work=true
+
+while getopts "nBt:" opt; do
+	case $opt in
+		B) remote_bare=false;;
+		t) track_upstream=true;;
+		n) do_work=false;;
+		*)
+			echo "Unknown option: -$opt"
+			usage
+			;;
+		:)
+			echo "Option -$OPTARG requires an argument."
+			usage
+			;;
+	esac
+done
+shift $((OPTIND-1))
 
 orig_repo="$1"
 srv="$2"
 remotepath="$3"
-remotebranch="$4"
-remotename="$5"
-usage () {
-	echo "$0 <repository_to_clone> <server> <remote_path> [<remote_branch> [<remote_name>]]"
-}
+remotename="$4"
 
 if [ -z "$orig_repo" -o -z "$srv" -o -z "$remotepath" ]; then
 	usage;
-	exit 1
+fi
+
+clone_opts=""
+if $remote_bare; then
+	clone_opts="$clone_opts --bare"
+	bare_repo="${orig_repo}.git"
+else
+	bare_repo="${orig_repo}"
+fi
+if [ -z "$remotename" ]; then
+	#pretty sure using two awk invocations is not optimal, but it works
+	remotename=$(echo $srv | awk -F'@' '{print $(NF)}' | awk -F'.' '{print $1}')
 fi
 
 echo orig_repo=$orig_repo
+echo bare_repo=$bare_repo
 echo server=$srv
+echo clone_opts=$clone_opts
 echo remotepath=$remotepath
-if [ ! -z "$remotebranch" ]; then
-	echo remotebranch=$remotebranch
-fi
-if [ -z "$remotename" ]; then
-	remotename="remote_repo"
-fi
 echo remotename=$remotename
 
-bare_repo="${orig_repo}.git"
-echo bare_repo=$bare_repo
+if $do_work; then
+	mkdir -p "$tmpdir"
+fi
+if [ -d "$tmpdir/${bare_repo}" ]; then
+	echo "Error: $tmp_dir/$bare_repo already exists."
+	exit 3
+fi
 
-git clone --bare "$orig_repo" "${bare_repo}"
+if $do_work; then
+	git clone$clone_opts "$orig_repo" "$tmpdir/${bare_repo}"
+else
+	echo "DUMMY RUN: NOT OPERATING"
+	echo "would do: $ git clone$clone_opts $orig_repo $tmpdir/${bare_repo}"
+fi
 
-echo "copying from \"${bare_repo}\" to \"${remotepath}\" on \"${srv}\"..."
-scp -r "${bare_repo}" "${srv}:${remotepath}"
+echo "copying from \"$tmpdir/${bare_repo}\" to \"${remotepath}\" on \"${srv}\"..."
+if $do_work; then
+	scp -r "$tmpdir/${bare_repo}" "${srv}:${remotepath}/${bare_repo}"
+fi
 
-echo "Configuring local - remote link"
-pushd "${orig_repo}"
-if git remote add "${remotename}" "ssh://${USER}@${srv}/${remotepath}/${bare_repo}"; then
-	if [ ! -z "$remotebranch" ]; then
-		echo "Fetching upstream..."
+echo "Configuring local-remote link"
+pushd "${orig_repo}" &> /dev/null
+current_branch=`git rev-parse --abbrev-ref HEAD`
+echo "current branch is '$current_branch'"
+
+if $do_work; then
+	if git remote add "${remotename}" "ssh://${srv}/${remotepath}/${bare_repo}"; then
+		echo "Fetching from remote..."
 		git fetch "$remotename"
-		echo "Setting upstream branch to track."
-		git branch --set-upstream-to "$remotename"/"$remotebranch"
+		if $track_upstream; then
+			echo "Setting upstream branch ($current_branch) to track."
+			git branch --set-upstream-to "$remotename"/"$current_branch"
+		fi
 	fi
 fi
-popd
-
+popd &> /dev/null
