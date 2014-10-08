@@ -14,6 +14,7 @@
 #
 # Update: as of ~14:30 2014-09-26, the bash in the Ubuntu 14.04 repositories is fixed.
 # 		-> but bash on fedora release 20 is not!
+#			-> As of 2014-10-07, An Amazon AWS Linux instance was still exposed to the bug!!, when first installed. Running sudo yum update fixes.
 #
 # ':' is a shell builtin which does nothing beyond expanding the arguments
 
