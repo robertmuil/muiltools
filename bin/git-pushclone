@@ -8,7 +8,7 @@
 # one does not want to clone from the remote machine. Examples are:
 #
 # 1. No incoming access to local server:
-#    When development has occured on a local machine to which one does not
+#    When development has occurred on a local machine to which one does not
 #    wish to grant any remote access, but it is desired to 'publish' the
 #    development to a server from which others can then get access.
 #
@@ -16,7 +16,7 @@
 #    When one does not have individual
 #    access to the remote server but can only login as a group user: in this
 #    case, initiating a clone from the remote server would require putting
-#    credentions for the local repository server in the group account of the
+#    credentials for the local repository server in the group account of the
 #    server.
 #
 # Author: Robert Muil.
