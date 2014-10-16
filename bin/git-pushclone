@@ -3,6 +3,8 @@
 # This clones a repository *to* a remote server
 # and makes this new repository a remote
 # repository of the current one. SSH protocol is used.
+# In essence, this makes up for the fact that 'git clone' doesn't support
+# the normal URL schemes for the remote.
 #
 # This implements a push-style of cloning, which is necessary whenever
 # one does not want to clone from the remote machine. Examples are:
@@ -20,8 +22,6 @@
 #    server.
 #
 # Author: Robert Muil.
-
-# TODO: fix (or remove) the automatic 'origin' remote branch in the remote repo (it will be a local link and so broken when we copy to server)
 
 usage () {
 	echo "Usage:"
