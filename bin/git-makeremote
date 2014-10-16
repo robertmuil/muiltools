@@ -1,19 +1,32 @@
 #!/bin/bash
 #
-# This clones a repository to a remote server, as a bare copy,
+# This clones a repository *to* a remote server
 # and makes this new repository a remote
 # repository of the current one. SSH protocol is used.
 #
-# This implements a push-style of cloning, which is necessary, for example,
-# in the case that one does not have individual access to the server but
-# can only login as a group user: in this case, initiating a clone from the
-# server would require putting credentions for *this* repository in the group
-# account of the server.
+# This implements a push-style of cloning, which is necessary whenever
+# one does not want to clone from the remote machine. Examples are:
+#
+# 1. No incoming access to local server:
+#    When development has occured on a local machine to which one does not
+#    wish to grant any remote access, but it is desired to 'publish' the
+#    development to a server from which others can then get access.
+#
+# 2. A communal login to remote server:
+#    When one does not have individual
+#    access to the remote server but can only login as a group user: in this
+#    case, initiating a clone from the remote server would require putting
+#    credentions for the local repository server in the group account of the
+#    server.
+#
+# Author: Robert Muil.
+
+# TODO: fix (or remove) the automatic 'origin' remote branch in the remote repo (it will be a local link and so broken when we copy to server)
 
 usage () {
 	echo "Usage:"
 	echo ""
-	echo "`basename $0` [-B] [-t] <repository_to_clone> <server> <remote_path> [<remote_name>]"
+	echo "`basename $0` [-Btn] <repository_to_clone> <server> <remote_path> [<remote_name>]"
 	echo ""
 	echo " -B: don't make remote a bare copy (i.e. allow it to have a working copy)."
 	echo " -t: set local branch to track corresponding remote branch (upstream)."
@@ -22,7 +35,7 @@ usage () {
 	echo " <repository_to_clone>: local repository to clone."
 	echo " <server>: the full server URL to clone to, including username if required."
 	echo " <remote_path>: the base directory under which the remote repo will be placed."
-	echo " <remote_name>: name to refer to the remote repository from this repository (defaults to first component of server)."
+	echo " <remote_name> (optional): name to refer to the remote repository from this repository (defaults to first component of server)."
 	exit 1
 }
 
@@ -31,6 +44,7 @@ tmpdir="tmp"
 remote_bare=true
 track_upstream=false
 do_work=true
+update_backlink=true
 
 while getopts "nBt:" opt; do
 	case $opt in
@@ -58,6 +72,9 @@ if [ -z "$orig_repo" -o -z "$srv" -o -z "$remotepath" ]; then
 	usage;
 fi
 
+set -o nounset
+set -o errexit
+
 clone_opts=""
 if $remote_bare; then
 	clone_opts="$clone_opts --bare"
@@ -81,26 +98,43 @@ if $do_work; then
 	mkdir -p "$tmpdir"
 fi
 if [ -d "$tmpdir/${bare_repo}" ]; then
-	echo "Error: $tmp_dir/$bare_repo already exists."
+	echo "Error: '${tmpdir}/${bare_repo}' already exists."
 	exit 3
 fi
 
 if $do_work; then
 	git clone$clone_opts "$orig_repo" "$tmpdir/${bare_repo}"
+	if $update_backlink; then
+		pushd "$tmpdir/${bare_repo}" &> /dev/null
+		this_repo_dir=$(git config --get remote.origin.url)
+		backlink="ssh://$USER@`hostname -f`/$this_repo_dir"
+		echo "Setting remote's backlink to this repo from '${this_repo_dir}' to '${backlink}'..."
+		git remote set-url origin "${backlink}"
+		popd &> /dev/null
+	fi
 else
 	echo "DUMMY RUN: NOT OPERATING"
 	echo "would do: $ git clone$clone_opts $orig_repo $tmpdir/${bare_repo}"
 fi
 
-echo "copying from \"$tmpdir/${bare_repo}\" to \"${remotepath}\" on \"${srv}\"..."
+echo "Ready to copy from \"$tmpdir/${bare_repo}\" to \"${remotepath}\" on \"${srv}\"..."
+echo "Press enter to continue, Ctrl-C to abort..."
+read
 if $do_work; then
+	echo "Copying..."
 	scp -r "$tmpdir/${bare_repo}" "${srv}:${remotepath}/${bare_repo}"
+	echo "Done copying."
+	archive="$tmpdir/${bare_repo}."$(date +%Y-%m-%dT%H%M%S)".tgz"
+	echo "Archiving local clone to '${archive}'..."
+	tar czf "${archive}" "${tmpdir}/${bare_repo}"
+	echo "Removing local clone..."
+	rm -rf "${tmpdir}/${bare_repo}"
 fi
 
-echo "Configuring local-remote link"
+echo "Configuring local-remote link..."
 pushd "${orig_repo}" &> /dev/null
 current_branch=`git rev-parse --abbrev-ref HEAD`
-echo "current branch is '$current_branch'"
+echo "Current branch is '$current_branch'."
 
 if $do_work; then
 	if git remote add "${remotename}" "ssh://${srv}/${remotepath}/${bare_repo}"; then
@@ -113,3 +147,4 @@ if $do_work; then
 	fi
 fi
 popd &> /dev/null
+echo "Successfully finished cloning to remote."
