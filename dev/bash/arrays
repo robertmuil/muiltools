@@ -1,0 +1,20 @@
+#!/bin/bash
+
+echo "$@"
+echo ${#@}
+
+something=("$@")
+echo ${something[@]}
+echo ${#something[@]}
+
+for f in "$@"; do
+	echo "f=$f"
+done
+
+for s in "${something[@]}"; do
+	echo "s=$s"
+done
+	
+if (( ${#something[@]} > 1 )); then
+	echo more than 1!
+fi

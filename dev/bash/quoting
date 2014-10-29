@@ -1,0 +1,18 @@
+sqlplus() {
+	echo "$@"
+	cat -
+}
+
+p_sql_login="<whateverlogin>"
+name='something'
+q_name="'$name'"   ##$name has some value already
+
+sqlplus $p_sql_login <<EOF
+	set heading off
+	set sqlnumber off
+	update Names_t
+	set DATE=Sysdate
+	,NAME =$q_name         ##this line has the error cause
+	,ID=$id;
+	commit;
+EOF
