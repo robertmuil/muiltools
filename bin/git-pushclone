@@ -122,7 +122,7 @@ echo "Press enter to continue, Ctrl-C to abort..."
 read
 if $do_work; then
 	echo "Copying..."
-	scp -r "$tmpdir/${bare_repo}" "${srv}:${remotepath}/${bare_repo}"
+	scp -p -r "$tmpdir/${bare_repo}" "${srv}:${remotepath}/${bare_repo}"
 	echo "Done copying."
 	archive="$tmpdir/${bare_repo}."$(date +%Y-%m-%dT%H%M%S)".tgz"
 	echo "Archiving local clone to '${archive}'..."
