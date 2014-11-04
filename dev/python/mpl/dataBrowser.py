@@ -10,6 +10,7 @@ fig = figure()
 ax = fig.add_subplot(211)
 ax.set_title('click on point to plot time series')
 line, = ax.plot(xs, ys, 'o', picker=5)  # 5 points tolerance
+line2, = ax.plot(xs*0.99, ys, 'x', picker=5)  # 5 points tolerance
 ax2 = fig.add_subplot(212)
 
 class PointBrowser:
@@ -27,9 +28,10 @@ class PointBrowser:
                                   color='yellow', visible=False)
 
     def onpress(self, event):
+        print 'onpress: event=({}), key=({})'.format(repr(event), repr(event.key))
         if self.lastind is None: return
-        if event.key not in ('n', 'p'): return
-        if event.key=='n': inc = 1
+        if event.key not in ('left', 'right', 'up', 'down'): return
+        if event.key in ('right', 'up'): inc = 1
         else:  inc = -1
 
 
@@ -38,11 +40,17 @@ class PointBrowser:
         self.update()
 
     def onpick(self, event):
+       print 'event: {}'.format(repr(event))
 
-       if event.artist!=line: return True
+       if event.artist!=line:
+           print 'event.artist ({}) is not line ({})'.format(
+                   repr(event.artist), repr(line))
+           return True
 
        N = len(event.ind)
-       if not N: return True
+       if not N:
+           print 'not N!'
+           return True
 
        # the click locations
        x = event.mouseevent.xdata
@@ -80,3 +88,4 @@ fig.canvas.mpl_connect('pick_event', browser.onpick)
 fig.canvas.mpl_connect('key_press_event', browser.onpress)
 
 show()
+# vim: et ts=4 sw=4
