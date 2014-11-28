@@ -36,6 +36,8 @@ fi
 
 #Run the setup program to establish links to personal config
 ./link_dotfiles
+./configure_backup
+
 #TODO: these scripts need work
 #./fetch_externals && ./do_install
 popd

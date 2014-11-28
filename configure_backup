@@ -1,0 +1,43 @@
+#!/bin/bash
+# This script configures things for backup - such things as the Skype directory,
+# which is a dot directory and so not backed up by SpiderOak, etc.
+# In general, it's just a convenient place for me to document (and automate)
+# how I back things up.
+#
+# NB: this should not do any backup, just configure it - and it should be
+# updated whenever I change how I do things.
+set -o errexit
+
+#TODO: ensure SpiderOak is installed.
+
+#TODO: ensure SpiderOak is backing ~/Personal up.
+
+#Configure Skype to be backed up
+hname=$(hostname)
+while [ -z "$hname" -o "localhost" == "$hname" ]; do
+	sleep 0.2
+	read -p "Didn't get a good hostname ($hname). Please provide a better identifier for this computer: " hname
+done
+echo "This computer is '$hname'"
+
+skype_base="$HOME/.Skype"
+usernames_to_backup="$BACKUP_SKYPE_USERNAMES"
+if [ -z "$usernames_to_backup" ]; then
+	read -p "Which skype usernames would you like to backup? " usernames_to_backup
+fi
+skype_backup_dir="$HOME/Personal/communication/Skype/$hname"
+mkdir -p "$skype_backup_dir"
+echo "To backup: $usernames_to_backup"
+for username in $usernames_to_backup; do
+	src="$skype_base/$username"
+	if [ ! -d "$src" ]; then
+		echo "Warning: $src does not exist... skipping."
+		continue
+	fi
+	echo -n "Linking files in $src to $skype_backup_dir/$username..."
+	mkdir -p "$skype_backup_dir/$username"
+	find "$src" -maxdepth 1 -type f -exec ln -f -t "$skype_backup_dir/$username/" {} \;
+	echo "done."
+done
+
+echo "$0 finished successfully."
