@@ -22,6 +22,7 @@ echo "This computer is '$hname'"
 
 skype_base="$HOME/.Skype"
 usernames_to_backup="$BACKUP_SKYPE_USERNAMES"
+#TODO: get this automatically, or at list offer a list?
 if [ -z "$usernames_to_backup" ]; then
 	read -p "Which skype usernames would you like to backup? " usernames_to_backup
 fi
