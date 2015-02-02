@@ -4,6 +4,7 @@ import sys
 from scipy.stats import pearsonr
 import ipdb
 import itertools
+import seaborn
 
 dbg_lvl=0
 
@@ -92,7 +93,7 @@ def thiel_sen(D):
 	m = np.median(slopes)
 	return (m,)
 
-if __name__ == '__main__':
+def test_thiel_sen():
 
 	d = 2
 	desired_coefficient=0.5
@@ -116,3 +117,33 @@ if __name__ == '__main__':
 			label='Thiel-Sen Regression Line')
 	pp.legend()
 	pp.show()
+
+def test_log_log_reg():
+
+	x=np.linspace(0.01, 10, 1000)
+
+	pp.figure()
+
+	for w in [0.1,0.5,1.0,1.5,2.0,2.5,3.0]:
+		#log(y) = w*log(x)
+		y=np.exp(w*np.log(x))
+		[line1] = pp.plot(x,y, label='log(y) = {:.1f} * log(x) (i.e. y = x^{:.1f})'.format(w,w))
+
+		if False:
+			y2=x**w
+			pp.plot(x,y2, '.', color=line1.get_color(), label='y=x^{:.1f}'.format(w))
+	
+	pp.xlabel('x')
+	pp.ylabel('y')
+	pp.ylim(0,20)
+	pp.legend()
+	pp.title('Linear models that were fit in the log-log space.')
+	pp.show()
+
+if __name__ == '__main__':
+
+	if False:
+		test_thiel_sen()
+
+	if True:
+		test_log_log_reg()
