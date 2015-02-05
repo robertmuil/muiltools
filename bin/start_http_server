@@ -1,0 +1,32 @@
+#!/bin/bash
+
+#
+# Start a webfsd-based server
+
+root_dir=~/web/srv
+port=8080
+log_file=~/web/requests.log
+pid_file=~/web/webfsd.pid
+index_file="index.html"
+wantsecure=false
+webuser=""
+webpw=""
+extraopts=""
+
+if [ -z "$webuser" ]; then
+	read -p "Set user name: " webuser
+fi
+if [ -z "$webpw" ]; then
+	read -s -p "Set password: " webpw
+fi
+
+if $wantsecure; then
+	extraopts="$extraopts -S"
+fi
+
+webfsd -r "$root_dir" -p $port -L "$log_file" -k "$pid_file" -b"$webuser:$webpw" -f "$index_file" $extraopts
+
+sleep 0.1
+
+echo "Socket status:"
+ss -l -p -r |grep `cat "$pid_file"`
