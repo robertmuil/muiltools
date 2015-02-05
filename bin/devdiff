@@ -25,9 +25,11 @@ while true; do
 			$cmd > $snapshot 2> /dev/null
 		fi
 		$cmd > $current 2> /dev/null
-		$DIFF --side-by-side --suppress-common-lines "$snapshot" "$current"
-		if (( $? != 0 )); then
+		#$DIFF --side-by-side --suppress-common-lines "$snapshot" "$current"
+		$DIFF --suppress-common-lines "$snapshot" "$current"
+		if (( $? == 1 )); then
 			/bin/cp $current $snapshot
+			echo "  ^(change in $cmd output)"
 		fi
 		IFS=%
 	done

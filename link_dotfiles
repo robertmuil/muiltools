@@ -20,6 +20,9 @@ if [ -x make_arch_dirs ]; then
 	. ./make_arch_dirs
 fi
 
+#link the muiltools bin to allow it to be part of PATH
+ln -sv ~/usr/muiltools/bin ~/usr/bin
+
 for targetDir in ${!batchSources[@]}; do
 	srcDir=${batchSources[${targetDir}]}
 	echo "${srcDir} -> ${targetDir}"
