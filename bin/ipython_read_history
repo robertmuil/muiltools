@@ -1,0 +1,22 @@
+#!/bin/bash
+#
+# Simply queries the ipython history database to get the most recent 10 lines,
+# can optionally provide a string which must occur in the line.
+#
+# e.g. ipython_read_history "plot"
+
+dbfpath="$HOME/.ipython/profile_default/history.sqlite"
+
+filter="$1"
+
+querypre='select sessions.start,history.source from history join sessions on history.session=sessions.session'
+querypst=' order by sessions.start DESC limit 10;'
+
+if [ ! -z "$filter" ]; then
+	queryflt=" where history.source like '%$filter%'"
+else
+	queryflt=''
+fi
+
+sqlite3 $dbfpath "$querypre""$queryflt""$querypst"
+
