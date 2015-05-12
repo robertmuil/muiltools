@@ -10,13 +10,15 @@ dbfpath="$HOME/.ipython/profile_default/history.sqlite"
 filter="$1"
 
 querypre='select sessions.start,history.source_raw from history join sessions on history.session=sessions.session'
-querypst=' order by sessions.start DESC limit 10;'
+querypst=' order by sessions.start DESC'
 
 if [ ! -z "$filter" ]; then
 	queryflt=" where history.source like '%$filter%'"
+	limit=""
 else
 	queryflt=''
+	limit=" LIMIT 10"
 fi
 
-sqlite3 $dbfpath "$querypre""$queryflt""$querypst"
+sqlite3 $dbfpath "$querypre""$queryflt""$querypst""$limit;"
 
