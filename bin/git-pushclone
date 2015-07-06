@@ -126,6 +126,10 @@ echo "Ready to copy from \"$tmpdir/${bare_repo}\" to \"${remotepath}\" on \"${sr
 echo "Press enter to continue, Ctrl-C to abort..."
 read
 if $do_work; then
+	if ssh ${srv} test -d "${remotepath}/${bare_repo}"; then
+		echo "WARNING: '${remotepath}/${bare_repo}' exists on ${srv}... Continue? (Ctrl-C to abort)"
+		read
+	fi
 	echo "Copying..."
 	scp -p -r "$tmpdir/${bare_repo}" "${srv}:${remotepath}/${bare_repo}"
 	echo "Done copying."
