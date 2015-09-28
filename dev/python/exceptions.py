@@ -6,6 +6,7 @@ blah=[1,2,3]
 try:
 	blah[4]
 except IndexError as exc:
+	#TODO: actually this doesnt properly preserve the traceback i dont think
 	args = exc.args
 	if args is None:
 		args = []

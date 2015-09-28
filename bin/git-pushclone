@@ -104,23 +104,32 @@ fi
 
 if $do_work; then
 	git clone$clone_opts "$orig_repo" "$tmpdir/${bare_repo}"
-	if $update_backlink; then
-		pushd "$tmpdir/${bare_repo}" &> /dev/null
-		this_repo_dir=$(git config --get remote.origin.url)
-		backlink="ssh://$USER@`hostname -f`/$this_repo_dir"
-		echo "Setting remote's backlink to this repo from '${this_repo_dir}' to '${backlink}'..."
-		git remote set-url origin "${backlink}"
-		popd &> /dev/null
-	fi
 else
 	echo "DUMMY RUN: NOT OPERATING"
 	echo "would do: $ git clone$clone_opts $orig_repo $tmpdir/${bare_repo}"
+fi
+
+if $update_backlink; then
+	pushd "$tmpdir/${bare_repo}" &> /dev/null
+	this_repo_dir=$(git config --get remote.origin.url)
+	backlink="ssh://$USER@`hostname -f`/$this_repo_dir"
+	echo "Setting remote's backlink to this repo from '${this_repo_dir}' to '${backlink}'..."
+	if $do_work; then
+		git remote set-url origin "${backlink}"
+	else
+		echo "would do: $ git remote set-url origin '${backlink}'"
+	fi
+	popd &> /dev/null
 fi
 
 echo "Ready to copy from \"$tmpdir/${bare_repo}\" to \"${remotepath}\" on \"${srv}\"..."
 echo "Press enter to continue, Ctrl-C to abort..."
 read
 if $do_work; then
+	if ssh ${srv} test -d "${remotepath}/${bare_repo}"; then
+		echo "WARNING: '${remotepath}/${bare_repo}' exists on ${srv}... Continue? (Ctrl-C to abort)"
+		read
+	fi
 	echo "Copying..."
 	scp -p -r "$tmpdir/${bare_repo}" "${srv}:${remotepath}/${bare_repo}"
 	echo "Done copying."
