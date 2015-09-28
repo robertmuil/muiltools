@@ -1,0 +1,11 @@
+#!/usr/bin/env groovy
+
+date = new Date();  
+for(line in System.in.readLines()){  
+  print date.toString()+"\t";  
+  bits = line.split(",");  
+  for(bit in bits){  
+    print bit+"\t";  
+  }  
+  println "";  
+}
