@@ -1,0 +1,16 @@
+#!/bin/bash
+#
+#sort a file with a header.
+# Just sorts the file with the standard sort utility, but first saves the header
+# and restores it after the sort.
+#
+#TODO: pass all options to sort
+# Robert Muil 2015-07-15
+
+nheaders=2
+
+fpath=$1
+
+h=$(head -$nheaders "$fpath")
+echo "${h}"
+sed 1,${nheaders}d "${fpath}" | sort -u -t';' -k1,1

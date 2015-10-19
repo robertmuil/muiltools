@@ -26,11 +26,13 @@
 usage () {
 	echo "Usage:"
 	echo ""
-	echo "`basename $0` [-Btn] <repository_to_clone> <server> <remote_path> [<remote_name>]"
+	echo "`basename $0` [-Btny] [-s <sshopts>] <repository_to_clone> <server> <remote_path> [<remote_name>]"
 	echo ""
 	echo " -B: don't make remote a bare copy (i.e. allow it to have a working copy)."
 	echo " -t: set local branch to track corresponding remote branch (upstream)."
 	echo " -n: no-action - don't actually do anything, just show what would be done."
+	echo " -y: assume-yes - don't prompt, just do"
+	echo " -s: sshopts are options to pass to the ssh command, such as to use a different key file"
 	echo ""
 	echo " <repository_to_clone>: local repository to clone."
 	echo " <server>: the full server URL to clone to, including username if required."
@@ -44,19 +46,22 @@ tmpdir="tmp"
 remote_bare=true
 track_upstream=false
 do_work=true
+assume_yes=false
 update_backlink=true
+ssh_opts=""
 
-while getopts "nBt:" opt; do
+while getopts "nyBts:?h" opt; do
 	case $opt in
 		B) remote_bare=false;;
 		t) track_upstream=true;;
 		n) do_work=false;;
-		*)
-			echo "Unknown option: -$opt"
+		y) assume_yes=true;;
+		s) ssh_opts=$OPTARG;;
+		?|h)
 			usage
 			;;
-		:)
-			echo "Option -$OPTARG requires an argument."
+		*)
+			echo "Unknown option: -$opt"
 			usage
 			;;
 	esac
@@ -67,6 +72,8 @@ orig_repo="$1"
 srv="$2"
 remotepath="$3"
 remotename="$4"
+ssh="ssh $ssh_opts"
+scp="scp $ssh_opts"
 
 if [ -z "$orig_repo" -o -z "$srv" -o -z "$remotepath" ]; then
 	usage;
@@ -91,6 +98,7 @@ echo orig_repo=$orig_repo
 echo bare_repo=$bare_repo
 echo server=$srv
 echo clone_opts=$clone_opts
+echo ssh_opts=$ssh_opts
 echo remotepath=$remotepath
 echo remotename=$remotename
 
@@ -123,15 +131,19 @@ if $update_backlink; then
 fi
 
 echo "Ready to copy from \"$tmpdir/${bare_repo}\" to \"${remotepath}\" on \"${srv}\"..."
-echo "Press enter to continue, Ctrl-C to abort..."
-read
+if $assume_yes; then
+	echo "Assuming yes, continuing."
+else
+	echo "Press enter to continue, Ctrl-C to abort..."
+	read
+fi
 if $do_work; then
-	if ssh ${srv} test -d "${remotepath}/${bare_repo}"; then
+	if $ssh ${srv} test -d "${remotepath}/${bare_repo}"; then
 		echo "WARNING: '${remotepath}/${bare_repo}' exists on ${srv}... Continue? (Ctrl-C to abort)"
 		read
 	fi
 	echo "Copying..."
-	scp -p -r "$tmpdir/${bare_repo}" "${srv}:${remotepath}/${bare_repo}"
+	$scp -p -r "$tmpdir/${bare_repo}" "${srv}:${remotepath}/${bare_repo}"
 	echo "Done copying."
 	archive="$tmpdir/${bare_repo}."$(date +%Y-%m-%dT%H%M%S)".tgz"
 	echo "Archiving local clone to '${archive}'..."
@@ -146,7 +158,7 @@ current_branch=`git rev-parse --abbrev-ref HEAD`
 echo "Current branch is '$current_branch'."
 
 if $do_work; then
-	if git remote add "${remotename}" "ssh://${srv}/${remotepath}/${bare_repo}"; then
+	if git remote add "${remotename}" "ssh://${srv}/${remotepath}/${bare_repo}" 2>/dev/null; then
 		echo "Fetching from remote..."
 		git fetch "$remotename"
 		if $track_upstream; then
