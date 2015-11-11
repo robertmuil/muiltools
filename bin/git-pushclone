@@ -160,7 +160,11 @@ echo "Current branch is '$current_branch'."
 if $do_work; then
 	if git remote add "${remotename}" "ssh://${srv}/${remotepath}/${bare_repo}" 2>/dev/null; then
 		echo "Fetching from remote..."
-		git fetch "$remotename"
+		if git fetch "$remotename"; then
+			echo "success."
+		else
+			echo "could not fetch from remote. Not unexpected, and should not matter."
+		fi
 		if $track_upstream; then
 			echo "Setting upstream branch ($current_branch) to track."
 			git branch --set-upstream-to "$remotename"/"$current_branch"
