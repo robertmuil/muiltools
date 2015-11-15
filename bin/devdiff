@@ -1,6 +1,6 @@
 #!/bin/bash
 #Author: Robert Muil
-tmpdir=~/tmp
+tmpdir=~/.tmp
 
 OLDIFS=$IFS
 IFS=%
