@@ -6,7 +6,7 @@ eval "$COMMAND"
 
 if [ $? -eq 0 ]
 then
-   notify-send -t 5000 -u normal "$COMMAND Done!"
+   notify-send -t 5000 -u normal "\"$COMMAND\" Done!"
 else
-   notify-send -t 0 -u critical "$COMMAND Failed!"
+   notify-send -t 0 -u critical "\"$COMMAND\" Failed!"
 fi
