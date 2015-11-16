@@ -42,7 +42,7 @@ A short description of the scripts that I wrote:
 * `consolidate_into`	moves files from current directory to a target directory, and links are created in the current location
 
 * `dirToFlac`			converts all mp3 files in cur dir to flac
-* 
+
 * `fixMatlab`
 * `startMatlab`
 * `fixSPSS`
