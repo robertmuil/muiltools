@@ -9,8 +9,8 @@ dbfpath="$HOME/.ipython/profile_default/history.sqlite"
 
 filter="$1"
 
-querypre='select sessions.start,history.source_raw from history join sessions on history.session=sessions.session'
-querypst=' order by sessions.start DESC'
+querypre='select sessions.start,sessions.end,history.source_raw from history join sessions on history.session=sessions.session'
+querypst=' order by sessions.start,sessions.end DESC'
 
 if [ ! -z "$filter" ]; then
 	queryflt=" where history.source like '%$filter%'"
