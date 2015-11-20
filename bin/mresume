@@ -1,30 +1,36 @@
 #!/bin/bash
 #This stunning feat of scripting skill
 # is a wrapper for mplayer that saves and restores
-# the position in the file when the user exits before finishing the file.
+# the position in the video if the user exits before finishing.
 #
 #A simple text file is maintained in the directory to track the
-# position and used to resume when this file is played.
+# position and used to resume when the video is played.
 #
 #Called without a file, it will take the first bookmark it finds and open
-# the corresponding audiovideo file at the appropriate place.
+# the corresponding video at the appropriate place.
 #
-# The bookmark file will contain the time to resume at, in the format
+# The bookmark file contains the time to resume at, in the format
 # accepted by mplayer's -ss argument (seconds)
+# The position is also maintained in a .conf file in the same directory so
+# that mplayer will also honour the resume. I maintain the bookmark as well
+# because then mresume can be called without a file and it'll take that one.
+# Could use the .conf in the same way, but... well... you wanna do it?
+# NB: for mplayer to resume, must set the -use-filedir-conf=1 option (e.g. in
+# ~/.mplayer/conf
 #
-#There's a good chance I just wasted 3-odd hours of my life on this.
+#There's a good chance I just wasted 3 odd hours of my life on this.
 #
-#NB: before moving or deleting the bookmark file a copy is made to
+#Oh, and before moving or deleting the bookmark file a copy is made to
 # .<fname>.bak
 #
 #rmuil 2011/08/07
 
+#TODO: pass all remaining command-line arguments to mplayer
 #TODO: discard input already on stdin when asking for confirmation to delete bookmarkfile
 #TODO: if no avfile specified nor bookmark found, play first avfile found
-#TODO: pass all remaining command-line arguments to mplayer
 #TODO: error checking (e.g. of endPos before writing to bookmark file)
-#TODO: is there a more efficient way of determining position than
-# capturing all stdout of mplayer and parsing the file?
+#TODO: more efficient determination of position than parsing stdout of mplayer?
+#TODO: deprecate bookmark file in favour of the conffile
 
 rewind=5 # the small amount of time to rewind before resuming at bookmark position
 bookmarkext=.bookmark.txt
@@ -96,14 +102,14 @@ else
 	resumeArg="-ss $resumePos"
 fi
 
-statusfile=".$avfile$statusext"
+statusfile=".${avfile}${statusext}"
+conffile="${avfile}.conf"
 
 mplayer -msgmodule $resumeArg "$avfile" | tee "$statusfile"
 
 quitLine=`tail -1 "${statusfile}"`
 endStatusLine=`sed -e 's/\r/\r\n/g' "${statusfile}" | grep '^STATUSLINE' | tail -1`
 endPos=`sed -e 's/\r/\r\n/g' "${statusfile}" | awk -F '[ \t:]*' '$1~/STATUSLINE/ {print($3)}' | tail -1`
-#endPos=`awk -F '[ \t]*' '$1~/STATUSLINE/ {print($3)}'
 
 manualQuitRE="Exiting.*Quit"
 eofQuitRE="Exiting.*End [oO]f [fF]ile"
@@ -118,6 +124,7 @@ if [[ ${quitLine} =~ ${manualQuitRE} ]]; then
 			mv "${bookmarkfile}" ".${bookmarkfile}.bak"
 		fi
 		echo $endPos > "${bookmarkfile}"
+		echo "ss=$endPos" >> "${conffile}"
 		echo "done."
 	else
 		echo " but ending position could not be determined."
