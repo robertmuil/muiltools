@@ -1,0 +1,29 @@
+#!/bin/bash
+echo a
+cat a
+
+echo
+echo b
+cat b
+
+echo
+echo inner join
+join -1 1 -2 1 a b
+
+echo
+echo left outer join
+join -j 1 -a1 -oauto -e"-" a b
+
+echo
+echo right outer join
+join -j 1 -a2 -oauto -e"-" a b
+
+#NB: the -e option does not do what seems intuitive
+# it does not set the null character for outer joins but deals with
+# unexpectedly different numbers of columns
+#ok, rather it requires the format to be set to work properly
+
+#Try with gzip
+echo
+echo "left outer, gzipped"
+join -j 1 -a1 -oauto -e"-" <(zcat a.gz) <(zcat b.gz)

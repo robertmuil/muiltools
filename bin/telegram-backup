@@ -1,0 +1,9 @@
+#!/bin/bash
+
+tg=bin/telegram-cli
+
+contacts=$($tg -e contact_list)
+
+for c in "$contacts"; do
+	echo $c
+done
