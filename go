@@ -1,36 +1,18 @@
 #!/bin/bash
-# This is just a simple script that installs all of the standard
-# stuff that I always want on a newly installed linux OS.
+#This is a bootstrapping script - just installs a bare minimum in order to get git, then get the repo of which this is a part, then can call the full update script
 set -u
 set -e
 
 #Duck-typing: try apt-get and if it works use it...
 if $(which apt-get &> /dev/null); then
-	sudo apt-get update
-	sudo apt-get dist-upgrade
-
-	sudo apt-get install vim-gtk
-	sudo apt-get install zsh
-
-	sudo apt-get install numpy scipy ipython python-matplotlib
-	sudo apt-get build-dep python-matplotlib
-
+	sudo apt-get install git
 elif $(which yum &> /dev/null); then
-	sudo yum update
-
-	sudo yum group install 'C Development Tools and Libraries'
-	sudo yum group install 'Development Tools'
-	sudo yum install vim-enhanced vim-X11
-	sudo yum install zsh
-
-	sudo yum install numpy scipy ipython python-matplotlib
-	sudo yum-builddep python-matplotlib
+	sudo yum install git
 fi
 
 chsh -s $(which zsh)
 
-# Grab my git
-# this might be a bit circular because I'll probably store this script in git, but I can at least download it and run it.
+# Grab my git in case it's not already there.
 mkdir -p ~/usr
 pushd ~/usr
 
@@ -39,13 +21,11 @@ if [ ! -d muiltools ]; then
 	pushd muiltools && git submodule init && git submodule update
 else
 	pushd muiltools
+	git pull
 fi
 
-#Run the setup program to establish links to personal config
-./link_dotfiles
-./configure_backup
+#Start the full muiltools install
+./do_install
 
-#TODO: these scripts need work
-#./fetch_externals && ./do_install
 popd
 popd

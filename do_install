@@ -1,28 +1,54 @@
 #!/bin/bash
-#installs the tools of this package to local usr directory of home directory
-#
-LDIR="$HOME/usr/local"
-BDIR="$LDIR/bin"
+# This is just a simple script that installs all of the standard
+# stuff that I always want on a newly installed linux OS and
+# calls some other scripts that configure my links and apps...
+set -u
+set -e
 
-INST='ln -svfT'
+#Duck-typing: try apt-get and if it works use it...
+if $(which apt-get &> /dev/null); then
+	sudo apt-get update
+	sudo apt-get dist-upgrade
 
-pushd odt2txt > /dev/null
-make DESTDIR="$LDIR" install && make clean
-popd > /dev/null
+	sudo apt-get install vim-gtk
+	sudo apt-get install zsh
 
-if [ ! -d "$BDIR" ]; then
-	mkdir -pv "$BDIR"
+	sudo apt-get install git
+
+	sudo apt-get install numpy scipy ipython python-matplotlib
+	sudo apt-get build-dep python-matplotlib
+
+elif $(which yum &> /dev/null); then
+	sudo yum update
+
+	sudo yum group install 'C Development Tools and Libraries'
+	sudo yum group install 'Development Tools'
+	sudo yum install vim-enhanced vim-X11
+	sudo yum install zsh
+
+	sudo yum install numpy scipy ipython python-matplotlib
+	sudo yum-builddep python-matplotlib
 fi
 
-pushd bin > /dev/null
-for f in *; do
-	if [ -x "$f" ]; then
-		$INST "$PWD/$f" "$BDIR/$f"
-	fi
-done
-popd > /dev/null
+chsh -s $(which zsh)
 
-#TODO: test system architecture
+# Grab my repo in case it's not already there.
+mkdir -p ~/usr
+pushd ~/usr
 
-#TODO: install x86 bin
-#TODO: install x64 bin
+if [ ! -d muiltools ]; then
+	git clone git@github.com:robertmuil/muiltools.git
+	pushd muiltools && git submodule init && git submodule update
+else
+	pushd muiltools
+	git pull
+fi
+
+#Configure backup on new machine
+./configure_backup
+
+#Run the setup program to establish links to personal config
+./link_dotfiles
+
+popd
+popd
