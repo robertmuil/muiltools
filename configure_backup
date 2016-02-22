@@ -8,7 +8,23 @@
 # updated whenever I change how I do things.
 set -o errexit
 
-#TODO: ensure SpiderOak is installed.
+#Ensure Personal directory exists
+if [ ! -d "$HOME/Personal" ]; then
+	echo "Personal dir not found!"
+	exit 2
+fi
+if [ ! -d "$HOME/Personal/communication" ]; then
+	echo "Personal/communication dir not found!"
+	exit 2
+fi
+
+#Ensure SpiderOak is installed.
+if $(which SpiderOak &> /dev/null); then
+	#all good
+else
+	echo "SpiderOak does not seem to be installed!"
+	exit 3
+fi
 
 #TODO: ensure SpiderOak is backing ~/Personal up.
 

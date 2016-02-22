@@ -4,11 +4,18 @@
 set -u
 set -e
 
-#TODO: actually determine distro
-#TODO: add ubuntu and arch if required
-isFedora=1
+#Duck-typing: try apt-get and if it works use it...
+if $(which apt-get &> /dev/null); then
+	sudo apt-get update
+	sudo apt-get dist-upgrade
 
-if [ $isFedora ]; then
+	sudo apt-get install vim-gtk
+	sudo apt-get install zsh
+
+	sudo apt-get install numpy scipy ipython python-matplotlib
+	sudo apt-get build-dep python-matplotlib
+
+elif $(which yum &> /dev/null); then
 	sudo yum update
 
 	sudo yum group install 'C Development Tools and Libraries'
