@@ -10,8 +10,6 @@ elif $(which yum &> /dev/null); then
 	sudo yum install git
 fi
 
-chsh -s $(which zsh)
-
 # Grab my git in case it's not already there.
 mkdir -p ~/usr
 pushd ~/usr
