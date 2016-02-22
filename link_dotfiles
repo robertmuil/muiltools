@@ -8,7 +8,7 @@ shopt -s dotglob  #match hidden files (starting with a dot) also
 #NB: for xmodmap: a file named .Xmodmap in ~ will automatically by run by xinit.
 
 #These are the targets to be created by symbolic links to the Personal/config directory
-targets="$HOME/.htoprc $HOME/.Xmodmap $HOME/.Xresources $HOME/usr/lib $HOME/.config/awesome/rc.lua $HOME/.config/awesome/theme.lua $HOME/.bash_aliases $HOME/.bashrc $HOME/.inputrc $HOME/.zshrc $HOME/.vimrc $HOME/.vim $HOME/.mc/ini $HOME/.mc/panels.ini $HOME/.mc/bindings $HOME/.aliases $HOME/.ipython/profile_default/ipython_config.py $HOME/.ipython/profile_default/startup/ipy_user_focus.py $HOME/.subversion/config $HOME/.subversion/servers $HOME/.gitconfig $HOME/.config/inkscape/keys/default.xml"
+targets="$HOME/.htoprc $HOME/.Xmodmap $HOME/.Xresources $HOME/.config/awesome/rc.lua $HOME/.config/awesome/theme.lua $HOME/.bash_aliases $HOME/.bashrc $HOME/.inputrc $HOME/.zshrc $HOME/.vimrc $HOME/.vim $HOME/.mc/ini $HOME/.mc/panels.ini $HOME/.mc/bindings $HOME/.aliases $HOME/.ipython/profile_default/ipython_config.py $HOME/.ipython/profile_default/startup/ipy_user_focus.py $HOME/.subversion/config $HOME/.subversion/servers $HOME/.gitconfig $HOME/.config/inkscape/keys/default.xml $HOME/.filezilla/filezilla.xml $HOME/.filezilla/sitemanager.xml"
 
 #batchSources are directories of files that should all be linked, separately as files, from the sourceDir
 declare -A batchSources
@@ -21,7 +21,7 @@ if [ -x make_arch_dirs ]; then
 fi
 
 #link the muiltools bin to allow it to be part of PATH
-ln -sv ~/usr/muiltools/bin ~/usr/bin
+ln -svfT ~/usr/muiltools/bin ~/usr/bin
 
 for targetDir in ${!batchSources[@]}; do
 	srcDir=${batchSources[${targetDir}]}
@@ -70,8 +70,7 @@ for f in $targets; do
 	case $ff in
 		.gitconfig ) sourceDir="$HOME/Personal/config/git";;
 		ipy* ) sourceDir="$HOME/Personal/config/ipython";;
-		bin ) sourceDir="$HOME/Personal";;
-		lib ) sourceDir="$HOME/Personal";;
+		filezilla.xml | sitemanager.xml ) sourceDir="$HOME/Personal/config/filezilla";;
 		rc.lua | theme.lua) sourceDir="$HOME/Personal/config/awesome";;
 		.htoprc ) sourceDir="$HOME/Personal/config/htop";;
 		.bash* | .profile | .inputrc) sourceDir="$HOME/Personal/config/bash";;
