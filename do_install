@@ -30,7 +30,7 @@ elif $(which yum &> /dev/null); then
 	sudo yum-builddep python-matplotlib
 fi
 
-chsh -s $(which zsh)
+sudo chsh -s $(which zsh) $USER
 
 # Grab my repo in case it's not already there.
 mkdir -p ~/usr
