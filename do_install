@@ -37,6 +37,8 @@ mkdir -p ~/usr
 pushd ~/usr
 
 if [ ! -d muiltools ]; then
+	echo "Going to clone muiltools from GitHub now. You will be prompted for a password if you don't have your SSH key from this machine in GitHub (you can do that now if you want)... press enter when you're ready... (ctrl-c to quit)"
+	read
 	git clone git@github.com:robertmuil/muiltools.git
 	pushd muiltools && git submodule init && git submodule update
 else
