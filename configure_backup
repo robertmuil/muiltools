@@ -19,10 +19,10 @@ if [ ! -d "$HOME/Personal/communication" ]; then
 fi
 
 #Ensure SpiderOak is installed.
-if $(which SpiderOak &> /dev/null); then
-	#all good
+if $(which SpiderOakONE &> /dev/null); then
+	echo "SpiderOak installed, good."
 else
-	echo "SpiderOak does not seem to be installed!"
+	echo "SpiderOak does not seem to be installed, please install and rerun this!"
 	exit 3
 fi
 
@@ -38,9 +38,9 @@ echo "This computer is '$hname'"
 
 skype_base="$HOME/.Skype"
 usernames_to_backup="$BACKUP_SKYPE_USERNAMES"
-#TODO: get this automatically, or at list offer a list?
+#TODO: get this automatically, or at least offer a list?
 if [ -z "$usernames_to_backup" ]; then
-	read -p "Which skype usernames would you like to backup? " usernames_to_backup
+	read -p "Which skype usernames would you like to backup? (separate with space)" usernames_to_backup
 fi
 skype_backup_dir="$HOME/Personal/communication/Skype/$hname"
 mkdir -p "$skype_backup_dir"
