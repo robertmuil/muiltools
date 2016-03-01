@@ -10,13 +10,18 @@ if $(which apt-get &> /dev/null); then
 	sudo apt-get update
 	sudo apt-get dist-upgrade
 
+	sudo apt-get install git
 	sudo apt-get install vim-gtk
 	sudo apt-get install zsh
+	sudo apt-get install htop
 
-	sudo apt-get install git
+	sudo apt-get install python-numpy python-scipy ipython python-matplotlib
 
-	sudo apt-get install numpy scipy ipython python-matplotlib
-	sudo apt-get build-dep python-matplotlib
+	#Allow installation of numpy and scipy and matplotlib with pip
+	sudo apt-get build-dep python-matplotlib python-scipy python-numpy
+
+	#allow installation of pyodbc
+	sudo apt-get install unixodbc-dev
 
 elif $(which yum &> /dev/null); then
 	sudo yum update
@@ -25,9 +30,13 @@ elif $(which yum &> /dev/null); then
 	sudo yum group install 'Development Tools'
 	sudo yum install vim-enhanced vim-X11
 	sudo yum install zsh
+	sudo yum install htop
 
 	sudo yum install numpy scipy ipython python-matplotlib
-	sudo yum-builddep python-matplotlib
+	sudo yum-builddep python-matplotlib numpy scipy
+
+	#allow installation of pyodbc
+	sudo yum install unixODBC-devel
 fi
 
 sudo chsh -s $(which zsh) $USER
@@ -51,6 +60,8 @@ fi
 
 #Run the setup program to establish links to personal config
 ./link_dotfiles
+
+#TODO: do we want to setup a standard Python virtualenv?
 
 popd
 popd
