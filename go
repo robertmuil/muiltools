@@ -3,11 +3,20 @@
 set -u
 set -e
 
-#Duck-typing: try apt-get and if it works use it...
-if $(which apt-get &> /dev/null); then
-	sudo apt-get install git
-elif $(which yum &> /dev/null); then
-	sudo yum install git
+if $(which git &> /dev/null); then
+	echo "got git, proceeding..."
+else
+	#Duck-typing: try apt-get and if it works use it...
+	if $(which apt-get &> /dev/null); then
+		sudo apt-get install git
+	elif $(which dnf &> /dev/null); then
+		sudo dnf install git
+	elif $(which yum &> /dev/null); then
+		sudo yum install git
+	else
+		echo "Only support apt-get, dnf and yum so far, sorry... try installing git manually."
+		exit 1
+	fi
 fi
 
 # Grab my git in case it's not already there.

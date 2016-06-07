@@ -53,7 +53,7 @@ for username in $usernames_to_backup; do
 	fi
 	echo -n "Linking files in $src to $skype_backup_dir/$username..."
 	mkdir -p "$skype_backup_dir/$username"
-	find "$src" -maxdepth 1 -type f -exec ln -f -t "$skype_backup_dir/$username/" {} \;
+	find "$src" -maxdepth 1 -type f -exec ln -f -v -t "$skype_backup_dir/$username/" {} \;
 	echo "done."
 done
 
