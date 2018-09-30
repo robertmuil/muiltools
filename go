@@ -13,8 +13,10 @@ else
 		sudo dnf install git
 	elif $(which yum &> /dev/null); then
 		sudo yum install git
+	elif $(which brew &> /dev/null); then
+		brew install git
 	else
-		echo "Only support apt-get, dnf and yum so far, sorry... try installing git manually."
+		echo "Only support apt-get, dnf, yum, and brew so far, sorry... try installing git manually."
 		exit 1
 	fi
 fi

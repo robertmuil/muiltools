@@ -6,6 +6,7 @@
 #
 # NB: this should not do any backup, just configure it - and it should be
 # updated whenever I change how I do things.
+# TODO: implement for MacOS
 set -o errexit
 
 #Ensure Personal directory exists
@@ -20,7 +21,9 @@ fi
 
 #Ensure SpiderOak is installed.
 if $(which SpiderOakONE &> /dev/null); then
-	echo "SpiderOak installed, good."
+	echo "SpiderOak installed and on path, good."
+elif [ -x /Applications/SpiderOakONE.app/Contents/MacOS/SpiderOakONE ]; then
+	echo "On MacOS: SpiderOakONE installed although not on path, ok."
 else
 	echo "SpiderOak does not seem to be installed, please install and rerun this!"
 	exit 3
@@ -29,7 +32,7 @@ fi
 #TODO: ensure SpiderOak is backing ~/Personal up.
 
 #Configure Skype to be backed up
-hname=$(hostname)
+hname=$(hostname -s)
 while [ -z "$hname" -o "localhost" == "$hname" ]; do
 	sleep 0.2
 	read -p "Didn't get a good hostname ($hname). Please provide a better identifier for this computer: " hname
@@ -37,6 +40,11 @@ done
 echo "This computer is '$hname'"
 
 skype_base="$HOME/.Skype"
+if [ ! -d ${skype_base} ]; then
+	echo "don't have Skype base (${skype_base})..."
+	exit 4
+fi
+
 usernames_to_backup="$BACKUP_SKYPE_USERNAMES"
 #TODO: get this automatically, or at least offer a list?
 if [ -z "$usernames_to_backup" ]; then

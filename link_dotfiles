@@ -1,17 +1,52 @@
 #!/bin/bash
 #TODO: in first run, .vimrc is not linked because .vim is not created yet. Need to enforce order somehow...
+#TODO: fix for MacOSX: arrays are not working properly
 echo "Welcome to $0. This script will create links on this computer to the configuration data in ~/Personal/config such that config can be synced."
 shopt -s nullglob #if a filename pattern matches no files, don't use the pattern itself, just return null
 shopt -s dotglob  #match hidden files (starting with a dot) also
 
-#TODO: convert to associative array
+set -e
+
+ln="ln -svfT"
+# Detect the platform (similar to $OSTYPE)
+# and set any specific commands required
+OS='unknown'
+case $(uname) in
+  'Linux')
+    OS='Linux'
+    ;;
+  'FreeBSD')
+    OS='FreeBSD'
+    ;;
+  'WindowsNT')
+    OS='Windows'
+    ;;
+  'Darwin') 
+    OS='MacOS'
+    #MacOS - ln doesn't have a -T option
+    ln="ln -svfF"
+    ;;
+  'SunOS')
+    OS='Solaris'
+    ;;
+  'AIX') ;;
+  *) ;;
+esac
+
+
 #NB: for xmodmap: a file named .Xmodmap in ~ will automatically by run by xinit.
 
 #These are the targets to be created by symbolic links to the Personal/config directory
-targets="$HOME/.htoprc $HOME/.Xmodmap $HOME/.Xresources $HOME/.config/awesome/rc.lua $HOME/.config/awesome/theme.lua $HOME/.bash_aliases $HOME/.bashrc $HOME/.inputrc $HOME/.zshrc $HOME/.vimrc $HOME/.vim $HOME/.mc/ini $HOME/.mc/panels.ini $HOME/.mc/bindings $HOME/.aliases $HOME/.ipython/profile_default/ipython_config.py $HOME/.ipython/profile_default/startup/ipy_user_focus.py $HOME/.subversion/config $HOME/.subversion/servers $HOME/.gitconfig $HOME/.config/inkscape/keys/default.xml $HOME/.filezilla/filezilla.xml $HOME/.filezilla/sitemanager.xml"
+#TODO: convert to associative array
+targets="$HOME/.htoprc $HOME/.Xmodmap $HOME/.Xresources $HOME/.config/awesome/rc.lua $HOME/.config/awesome/theme.lua $HOME/.bash_aliases $HOME/.bashrc $HOME/.inputrc $HOME/.zshrc $HOME/.vim $HOME/.vimrc $HOME/.mc/ini $HOME/.mc/panels.ini $HOME/.mc/bindings $HOME/.aliases $HOME/.ipython/profile_default/ipython_config.py $HOME/.ipython/profile_default/startup/ipy_user_focus.py $HOME/.subversion/config $HOME/.subversion/servers $HOME/.config/inkscape/keys/default.xml $HOME/.filezilla/filezilla.xml $HOME/.filezilla/sitemanager.xml"
 
 #batchSources are directories of files that should all be linked, separately as files, from the sourceDir
-declare -A batchSources
+if [ $OS == 'MacOS' ]; then
+	declare -a batchSources
+else
+	declare -A batchSources
+fi
+
 batchSources["$HOME/usr/local/Umlet/palettes"]="$HOME/Personal/config/umlet/palettes"
 batchSources["$HOME/.config/awesome/revelation"]="$HOME/Personal/config/awesome/revelation"
 
@@ -21,7 +56,7 @@ if [ -x make_arch_dirs ]; then
 fi
 
 #link the muiltools bin to allow it to be part of PATH
-ln -svfT ~/usr/muiltools/bin ~/usr/bin
+$ln ~/usr/muiltools/bin ~/usr/bin
 
 for targetDir in ${!batchSources[@]}; do
 	srcDir=${batchSources[${targetDir}]}
@@ -49,7 +84,7 @@ for targetDir in ${!batchSources[@]}; do
 			fi
 			cp -r --backup=numbered "${target}" "$backupDir/"
 		fi
-		ln -svfT "${src}" "${target}"
+		$ln "${src}" "${target}"
 	done
 done
 
@@ -96,7 +131,7 @@ for f in $targets; do
 	if [ ! -d "$targetDir" ]; then
 		mkdir -p "$targetDir"
 	fi
-	ln -svfT $sourceFile "$f"
+	$ln $sourceFile "$f"
 done
 
 echo $0 finished.

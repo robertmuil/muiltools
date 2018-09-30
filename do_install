@@ -52,6 +52,13 @@ elif $(which yum &> /dev/null); then
 
 	#allow installation of pyodbc
 	sudo yum install unixODBC-devel
+elif $(which brew &> /dev/null); then
+	brew update
+
+	brew install zsh
+	brew install htop
+
+
 fi
 
 sudo chsh -s $(which zsh) $USER
