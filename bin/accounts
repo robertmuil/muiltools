@@ -73,7 +73,7 @@ do_mount () {
 		myuid=`id -u`
 		mygid=`id -g`
 		dbg1 "mounting 'accounts' device on '$MNTDIR'..."
-		sudo mount -v -t fuse -ouid=$myuid,gid=$mygid /dev/mapper/accounts $MNTDIR
+		sudo mount -v -t fuse -ouid=$myuid,gid=$mygid $devname $MNTDIR
 	else
 		dbg1 "mounting file with $TC..."
 		$TC -t -k "" --protect-hidden=no --mount $VOLFNAME
