@@ -26,11 +26,13 @@
 #rmuil 2011/08/07
 
 #TODO: pass all remaining command-line arguments to mplayer
+#TODO: put all these options into bookmark/conf file - i.e. resume exactly as called previously
 #TODO: discard input already on stdin when asking for confirmation to delete bookmarkfile
 #TODO: if no avfile specified nor bookmark found, play first avfile found
 #TODO: error checking (e.g. of endPos before writing to bookmark file)
 #TODO: more efficient determination of position than parsing stdout of mplayer?
 #TODO: deprecate bookmark file in favour of the conffile
+#TODO: append position to bookmark file, don't replace every time.
 
 rewind=5 # the small amount of time to rewind before resuming at bookmark position
 bookmarkext=.bookmark.txt
@@ -124,7 +126,9 @@ if [[ ${quitLine} =~ ${manualQuitRE} ]]; then
 			mv "${bookmarkfile}" ".${bookmarkfile}.bak"
 		fi
 		echo $endPos > "${bookmarkfile}"
-		echo "ss=$endPos" >> "${conffile}"
+		#if [ -f "${conffile}" ]; then
+			echo "ss=$endPos" >> "${conffile}"
+		#fi
 		echo "done."
 	else
 		echo " but ending position could not be determined."

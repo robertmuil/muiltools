@@ -23,6 +23,21 @@ if $(which apt-get &> /dev/null); then
 	#allow installation of pyodbc
 	sudo apt-get install unixodbc-dev
 
+elif $(which dnf &> /dev/null); then
+	sudo dnf update
+
+	sudo dnf group install 'C Development Tools and Libraries'
+	sudo dnf group install 'Development Tools'
+	sudo dnf install vim-enhanced vim-X11
+	sudo dnf install zsh
+	sudo dnf install htop
+
+	sudo dnf install numpy scipy ipython python-matplotlib
+	sudo dnf builddep python-matplotlib numpy scipy
+
+	#allow installation of pyodbc
+	sudo dnf install unixODBC-devel
+
 elif $(which yum &> /dev/null); then
 	sudo yum update
 
