@@ -1,0 +1,4 @@
+#!/bin/bash
+defaults write com.apple.finder AppleShowAllFiles YES
+echo "showing all files enabled: restart Finder."
+echo "oh and you can also just do CMD + SHIFT + ."
