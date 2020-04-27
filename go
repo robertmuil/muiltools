@@ -1,5 +1,9 @@
 #!/bin/bash
-#This is a bootstrapping script - just installs a bare minimum in order to get git, then get the repo of which this is a part, then can call the full update script
+#This is a bootstrapping script - just installs a bare minimum (git) in order to get the repo
+# of which this is a part, then can call the full update script.
+# Done like this as a separate script so that the full list of software to install etc. can
+# itself be configured within the muiltools repo full, and keeps this script simple.
+
 set -u
 set -e
 

@@ -12,7 +12,7 @@ if $(which apt-get &> /dev/null); then
 
 	sudo apt-get install git
 	sudo apt-get install vim-gtk
-	sudo apt-get install zsh
+	sudo apt-get install fish
 	sudo apt-get install htop
 
 	sudo apt-get install python-numpy python-scipy ipython python-matplotlib
@@ -29,7 +29,7 @@ elif $(which dnf &> /dev/null); then
 	sudo dnf group install 'C Development Tools and Libraries'
 	sudo dnf group install 'Development Tools'
 	sudo dnf install vim-enhanced vim-X11
-	sudo dnf install zsh
+	sudo dnf install fish
 	sudo dnf install htop
 
 	sudo dnf install numpy scipy ipython python-matplotlib
@@ -44,7 +44,7 @@ elif $(which yum &> /dev/null); then
 	sudo yum group install 'C Development Tools and Libraries'
 	sudo yum group install 'Development Tools'
 	sudo yum install vim-enhanced vim-X11
-	sudo yum install zsh
+	sudo yum install fish
 	sudo yum install htop
 
 	sudo yum install numpy scipy ipython python-matplotlib
@@ -55,26 +55,16 @@ elif $(which yum &> /dev/null); then
 elif $(which brew &> /dev/null); then
 	brew update
 
-	brew install zsh
+	brew install fish
 	brew install htop
+	# brew cask install anaconda
 
 
 fi
 
-sudo chsh -s $(which zsh) $USER
-
-# Grab my repo in case it's not already there.
-mkdir -p ~/usr
-pushd ~/usr
-
-if [ ! -d muiltools ]; then
-	echo "Going to clone muiltools from GitHub now. You will be prompted for a password if you don't have your SSH key from this machine in GitHub (you can do that now if you want)... press enter when you're ready... (ctrl-c to quit)"
-	read
-	git clone git@github.com:robertmuil/muiltools.git
-	pushd muiltools && git submodule init && git submodule update
-else
-	pushd muiltools
-	git pull
+if [ "Xfish" != "X$SHELL" ]; then
+	echo "changing default shell to fish... sudo required..."
+	sudo chsh -s $(which fish) $USER
 fi
 
 #Configure backup on new machine
