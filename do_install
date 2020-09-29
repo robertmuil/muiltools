@@ -55,20 +55,19 @@ elif $(which yum &> /dev/null); then
 elif $(which brew &> /dev/null); then
 	brew update
 
-	brew install fish
-	brew install htop
+	brew install fish htop coreutils
 	# brew cask install anaconda
 
 
 fi
 
-if [ "Xfish" != "X$SHELL" ]; then
+if [ "Xfish" != "X$(basename $SHELL)" ]; then
 	echo "changing default shell to fish... sudo required..."
 	sudo chsh -s $(which fish) $USER
 fi
 
 #Configure backup on new machine
-./configure_backup
+#./configure_backup
 
 #Run the setup program to establish links to personal config
 ./link_dotfiles

@@ -8,6 +8,7 @@ shopt -s dotglob  #match hidden files (starting with a dot) also
 set -e
 
 ln="ln -svfT"
+cp="cp -v"
 # Detect the platform (similar to $OSTYPE)
 # and set any specific commands required
 OS='unknown'
@@ -25,6 +26,7 @@ case $(uname) in
     OS='MacOS'
     #MacOS - ln doesn't have a -T option
     ln="ln -svfF"
+    cp="gcp -v"
     ;;
   'SunOS')
     OS='Solaris'
@@ -32,13 +34,14 @@ case $(uname) in
   'AIX') ;;
   *) ;;
 esac
+echo "Operating on $OS"
 
 
 #NB: for xmodmap: a file named .Xmodmap in ~ will automatically by run by xinit.
 
 #These are the targets to be created by symbolic links to the Personal/config directory
 #TODO: convert to associative array
-targets="$HOME/.htoprc $HOME/.Xmodmap $HOME/.Xresources $HOME/.config/awesome/rc.lua $HOME/.config/awesome/theme.lua $HOME/.bash_aliases $HOME/.bashrc $HOME/.inputrc $HOME/.zshrc $HOME/.vim $HOME/.vimrc $HOME/.mc/ini $HOME/.mc/panels.ini $HOME/.mc/bindings $HOME/.aliases $HOME/.ipython/profile_default/ipython_config.py $HOME/.ipython/profile_default/startup/ipy_user_focus.py $HOME/.subversion/config $HOME/.subversion/servers $HOME/.config/inkscape/keys/default.xml $HOME/.filezilla/filezilla.xml $HOME/.filezilla/sitemanager.xml"
+targets="$HOME/.htoprc $HOME/.Xmodmap $HOME/.Xresources $HOME/.config/awesome/rc.lua $HOME/.config/awesome/theme.lua $HOME/.bash_aliases $HOME/.bashrc $HOME/.inputrc $HOME/.zshrc $HOME/.vim $HOME/.vimrc $HOME/.mc/ini $HOME/.mc/panels.ini $HOME/.mc/bindings $HOME/.aliases $HOME/.ipython/profile_default/ipython_config.py $HOME/.ipython/profile_default/startup/ipy_user_focus.py $HOME/.subversion/config $HOME/.subversion/servers $HOME/.config/inkscape/keys/default.xml $HOME/.filezilla/filezilla.xml $HOME/.filezilla/sitemanager.xml $HOME/.config/fish"
 
 #batchSources are directories of files that should all be linked, separately as files, from the sourceDir
 if [ $OS == 'MacOS' ]; then
@@ -46,9 +49,6 @@ if [ $OS == 'MacOS' ]; then
 else
 	declare -A batchSources
 fi
-
-batchSources["$HOME/usr/local/Umlet/palettes"]="$HOME/Personal/config/umlet/palettes"
-batchSources["$HOME/.config/awesome/revelation"]="$HOME/Personal/config/awesome/revelation"
 
 #create the muiltools arch directories
 if [ -x make_arch_dirs ]; then
@@ -58,35 +58,43 @@ fi
 #link the muiltools bin to allow it to be part of PATH
 $ln ~/usr/muiltools/bin ~/usr/bin
 
-for targetDir in ${!batchSources[@]}; do
-	srcDir=${batchSources[${targetDir}]}
-	echo "${srcDir} -> ${targetDir}"
-	#if the source doesn't exist or is not a directory, ignore it
-	if [ ! -d ${srcDir} ]; then
-		continue
-	fi
 
-	if [ ! -d ${targetDir} ]; then
-		mkdir -p ${targetDir}
-	fi
-
-	for src in ${srcDir}/*; do
-		srcName=$(basename "${src}")
-		target=${targetDir}/${srcName}
-		if [ -z "${target}" ]; then
-			echo burp
+# DOESNT WORK WITH MACOS
+if [ X$OS == "XMacOS" ]; then
+	echo "not doing batchSources on macos..."
+else
+	batchSources["$HOME/usr/local/Umlet/palettes"]="$HOME/Personal/config/umlet/palettes"
+	batchSources["$HOME/.config/awesome/revelation"]="$HOME/Personal/config/awesome/revelation"
+	for targetDir in ${!batchSources[@]}; do
+		srcDir=${batchSources[${targetDir}]}
+		echo "${srcDir} -> ${targetDir}"
+		#if the source doesn't exist or is not a directory, ignore it
+		if [ ! -d ${srcDir} ]; then
 			continue
 		fi
-		if [ -e "${target}" -a ! -L "${target}" ]; then #exists
-			backupDir=${targetDir}/.backup
-			if [ ! -d "$backupDir" ]; then
-				mkdir -p "$backupDir"
-			fi
-			cp -r --backup=numbered "${target}" "$backupDir/"
+
+		if [ ! -d ${targetDir} ]; then
+			mkdir -p ${targetDir}
 		fi
-		$ln "${src}" "${target}"
+
+		for src in ${srcDir}/*; do
+			srcName=$(basename "${src}")
+			target=${targetDir}/${srcName}
+			if [ -z "${target}" ]; then
+				echo burp
+				continue
+			fi
+			if [ -e "${target}" -a ! -L "${target}" ]; then #exists
+				backupDir=${targetDir}/.backup
+				if [ ! -d "$backupDir" ]; then
+					mkdir -p "$backupDir"
+				fi
+				$cp -r --backup=numbered "${target}" "$backupDir/"
+			fi
+			$ln "${src}" "${target}"
+		done
 	done
-done
+fi
 
 backupDir=$HOME/.backup
 
@@ -96,10 +104,10 @@ fi
 
 for f in $targets; do
 	if [ -f "$f" ]; then
-		cp --backup=numbered "$f" $backupDir
+		$cp --backup=numbered "$f" $backupDir
 	fi
 	if [ -d "$f" ]; then
-		cp --backup=numbered -r "$f" $backupDir/
+		$cp --backup=numbered -r "$f" $backupDir/
 	fi
 	ff=`basename "$f"`
 	case $ff in
