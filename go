@@ -25,7 +25,7 @@ else
 	fi
 fi
 
-# Grab my git in case it's not already there.
+# Grab the repo in case it's not already there - this means you can just pull the script and run it
 mkdir -p ~/usr
 pushd ~/usr
 

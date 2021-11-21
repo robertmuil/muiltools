@@ -56,7 +56,7 @@ if [ -x make_arch_dirs ]; then
 fi
 
 #link the muiltools bin to allow it to be part of PATH
-$ln ~/usr/muiltools/bin ~/usr/bin
+#$ln ~/usr/muiltools/bin ~/usr/bin #eep that looks dangerous or at least won't usually work...
 
 
 # DOESNT WORK WITH MACOS
