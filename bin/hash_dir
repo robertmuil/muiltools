@@ -1,0 +1,23 @@
+#!/usr/bin/env bash
+
+
+#TODO: add date and perhaps path to the name
+fout="dirhash_$(date -Iseconds).txt"
+fin="."
+msg="$1"
+
+if [[ "X$fin" == "X" ]]; then
+	fin="."
+fi
+fin=$(realpath "$fin")
+
+echo hashing [$fin]
+#credit for the find command: https://stackoverflow.com/a/545413/480534
+echo "$fin" > "$fout"
+hash=$(find "$fin" -type f -not -name "dirhash_*" -print0 | sort -z | xargs -0 sha1sum | sha1sum)
+echo $hash
+echo $hash >> "$fout"
+
+echo "$msg" >> "$fout"
+
+echo written [$fout]
