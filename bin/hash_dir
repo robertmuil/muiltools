@@ -1,11 +1,16 @@
 #!/usr/bin/env bash
 
+PREFIX="_dirhash_"
 
-#TODO: add date and perhaps path to the name
-fout="dirhash_$(date -Iseconds).txt"
+timestamp=$(date -Iseconds)
+fout="${PREFIX}${timestamp//:}.txt"
 fin="."
 msg="$1"
 
+if [[ "X$msg" == "X" ]]; then
+	echo "Please provide a message"
+	exit 2
+fi
 if [[ "X$fin" == "X" ]]; then
 	fin="."
 fi
@@ -13,11 +18,17 @@ fin=$(realpath "$fin")
 
 echo hashing [$fin]
 #credit for the find command: https://stackoverflow.com/a/545413/480534
-echo "$fin" > "$fout"
-hash=$(find "$fin" -type f -not -name "dirhash_*" -print0 | sort -z | xargs -0 sha1sum | sha1sum)
-echo $hash
-echo $hash >> "$fout"
-
-echo "$msg" >> "$fout"
+file_hashes=$(find "$fin" -type f -not -name "${PREFIX}*" -print0 | sort -z | xargs -0 sha1sum)
+nfiles=$(echo "$file_hashes" |wc -l)
+dir_hash=$(echo $file_hashes | sha1sum)
+echo "$dir_hash"
+echo "$nfiles files"
+echo "$dir_hash" > "$fout"
+echo "directory:: $fin" >> "$fout"
+echo "timestamp:: $timestamp" >> "$fout"
+echo "hash_type:: sha1sum" >> "$fout"
+echo "message:: $msg" >> "$fout"
+echo "## $nfiles individual hashes follow (only files, sorted with sort -z)" >> "$fout"
+echo "$file_hashes" >> "$fout"
 
 echo written [$fout]
