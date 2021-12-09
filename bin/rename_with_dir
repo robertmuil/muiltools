@@ -1,0 +1,24 @@
+#!/usr/bin/env bash
+
+echo "This will move all files in subfolders into this dir, renaming them to include the subfolder in the filename"
+echo "hit ctrl-c to cancel, otherwise enter to continue"
+read
+
+for d in *; do
+	if [[ ! -d $d ]]; then
+		continue
+	fi
+	echo "$d"
+	pushd "$d" > /dev/null
+	for f in *; do
+		if [[ ! -f "$f" ]]; then
+			echo EEP - what is $f if not a file?
+			continue
+		fi
+		newf="${f%.*} - $d.${f##*.}"
+		#echo "[$f] to [$newf]"
+		mv -v "$f" "../$newf"
+	done
+	popd > /dev/null
+done
+
