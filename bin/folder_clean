@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+echo "This will remove a bunch of unnecessary files and empty directories"
+echo "hit ctrl-c to cancel, otherwise enter to continue"
+read
+
+# Thumbs.db can get very big, but just as a precaution, dont delete if its
+# bigger than 10M
+find ./ -type f -name "Thumbs.db" -size -10M -print -delete
+
+# picasa
+find ./ -type f -name "*icasa.ini" -size -100k -print -delete
+
+# mac stuff
+find ./ -type f -name ".DS_Store" -size -10k -print -delete
+
+# empty directories
+find ./ -type d -empty -print -delete
+
+odd=$(find ./ -type f -name "Thumbs.db" -exec du -h {} \;)
+odd="$odd""$(find ./ -type f -name "*icasa.ini" -exec du -h {} \;)"
+odd="$odd""$(find ./ -type f -name ".DS_Store" -exec du -h {} \;)"
+if [[ ! -e "${odd}" ]]; then
+	echo "WARN: found some odd files, worth checking manually:"
+	echo "${odd}"
+fi
