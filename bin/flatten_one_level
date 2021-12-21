@@ -1,0 +1,47 @@
+#!/usr/bin/env bash
+
+if [ -z $_FLATTEN_RECURSION ]; then
+	echo "flatten_one_level:"
+	echo
+	echo "This will move files into their immediate subfolder, renaming them to include the subfolder in the filename"
+	echo 
+	echo "hit ctrl-c to cancel, or enter to continue"
+	read
+fi
+_FLATTEN_RECURSION=true
+
+# Considered using find to execute the rename, but it's tricky with commands
+# that change/move the file. find complains.
+
+# NB: the renamed files from multiple subfolders will be named with the 
+# deepest folder name first, counter-intuitively.
+
+for d in *; do
+	if [[ ! -d $d ]]; then
+		continue
+	fi
+	echo "$d"
+	pushd "$d" > /dev/null
+	for f in *; do
+		if [[ -d "$f" ]]; then
+			echo recursing into [$f]...
+			. flatten_one_level "$f"
+			continue
+		fi
+	# NB: these following two commented lines are the only difference from flatten_full
+	#done
+	#for f in *; do
+		if [[ -f "$f" ]]; then
+			newext=${f##*.}
+			if [[ X"$newext" == X"$f" ]]; then
+				newext="" # means there was no . to separate, so dont repeat the filename as its own extension
+			else
+				newext=".$newext"
+			fi
+			newf="${f%.*} - $d$newext"
+			#echo "[$f] to [../$newf]"
+			mv -v "$f" "../$newf"
+		fi
+	done
+	popd > /dev/null
+done

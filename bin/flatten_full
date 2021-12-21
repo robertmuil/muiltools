@@ -1,0 +1,55 @@
+#!/usr/bin/env bash
+#TODO fix: renamed to rmlint.sh as subfolder when i ran from a in a/2012 - Ostensibles - Dying for a Laugh
+# i think it was because of using the . sourcing in a recursive call
+
+#if [ -z $_FLATTEN_RECURSION ]; then
+#	echo "fatten_full:"
+#	echo
+#	echo "This will pull all files in all subfolders into this dir, renaming them to include in the filename the original containing subfolder(s)."
+#	echo
+#	echo "hit ctrl-c to cancel, or enter to continue"
+#	read
+#fi
+#_FLATTEN_RECURSION=true
+
+
+
+# currently, this really flattens everything into current folder...
+# it might be desirable to just do one level of flatten on each invocation,
+# which would just be doing the recursion in the same for loop as the rename...
+
+# Considered using find to execute the rename, but it's tricky with commands
+# that change/move the file. find complains.
+
+# NB: the renamed files from multiple subfolders will be named with the 
+# deepest folder name first, counter-intuitively.
+
+for d in *; do
+	if [[ ! -d $d ]]; then
+		continue
+	fi
+	echo "$d"
+	pushd "$d" > /dev/null
+	for f in *; do
+		if [[ -d "$f" ]]; then
+			echo recursing into [$f]...
+			flatten_full "$f"
+			continue
+		fi
+	# NB: these following two lines are the only difference from flatten_one_level
+	done
+	for f in *; do
+		if [[ -f "$f" ]]; then
+			newext=${f##*.}
+			if [[ X"$newext" == X"$f" ]]; then
+				newext="" # means there was no . to separate, so dont repeat the filename as its own extension
+			else
+				newext=".$newext"
+			fi
+			newf="${f%.*} - $d$newext"
+			#echo "[$f] to [../$newf]"
+			mv -v "$f" "../$newf"
+		fi
+	done
+	popd > /dev/null
+done
