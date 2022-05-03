@@ -7,7 +7,7 @@ that is not mine should be commented as such.
 
 Quick Start
 ----------
-0. Download go script: `curl -o go-muiltools "https://raw.githubusercontent.com/robertmuil/muiltools/master/go"
+0. Download go script: `curl -o go-muiltools "https://raw.githubusercontent.com/robertmuil/muiltools/master/go"`
 1. Run it: `bash go-muiltools`
 
 Description
