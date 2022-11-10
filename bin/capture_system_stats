@@ -1,0 +1,21 @@
+#!/usr/bin/env bash
+
+# For trouble-shooting, this captures basic system stats every 5 seconds.
+
+fpath_logprefix=$HOME/Desktop/troubleshooting/system_stats
+fpath_logsuffix=.log
+date_fmt="+%Y-%m-%dT%H%M%S"
+loop_delay=5
+
+while true; do
+	for ii in {0..99}; do
+		fpath_log="${fpath_logprefix}_${ii}${fpath_logsuffix}"
+		echo "capturing to \"$fpath_log\""
+		echo "### $(date $date_fmt)" > $fpath_log
+		top -l 1 >> $fpath_log
+
+		sleep $loop_delay;
+	done
+done
+
+

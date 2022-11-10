@@ -1,0 +1,14 @@
+#!/usr/bin/env bash
+
+# For trouble-shooting, this reads basic system stats captured by capture_system_stats
+
+fpath_logdir=$HOME/Desktop/troubleshooting
+fpath_logsuffix=.log
+
+#TODO: order by date in the file (or just modification date would work)
+head $fpath_logdir/*$fpath_logsuffix
+#for f in "$fpath_logdir/*"; do
+#	echo $f
+#done
+
+
