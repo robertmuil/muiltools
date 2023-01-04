@@ -40,7 +40,7 @@ for d in *; do
 			fi
 			newf="${f%.*} - $d$newext"
 			#echo "[$f] to [../$newf]"
-			mv -v "$f" "../$newf"
+			mv -v --no-clobber "$f" "../$newf"
 		fi
 	done
 	popd > /dev/null

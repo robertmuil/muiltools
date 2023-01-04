@@ -18,7 +18,7 @@ for p_sub in p_base.iterdir():
 pprint(hashes)
 
 if False:
-	TODO sdomething about this doesnt work
+	print('TODO something about this doesnt work')
 	missing_hashes={k for h,v in hashes.items() if len(hashes[v]) < 1}
 	pprint(missing_hashes)
 	if len(missing_hashes) > 1:
