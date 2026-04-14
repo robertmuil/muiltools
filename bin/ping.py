@@ -12,4 +12,4 @@ def do_ping(host, num=4):
 
 if __name__ == '__main__':
 	out,err = do_ping('www.google.com')
-	print out
+	print(out.decode())
