@@ -12,6 +12,6 @@ fi
 
 while true; do
 	printf "\n\n>>> $($DATE): "
-	ping -c 2 -A "$host"
-	sleep 0.2
+	ping -c 5 -A "$host"
+	sleep 2.0
 done
